@@ -19,6 +19,70 @@
 
   <echo value="Building extension-ffmpeg..." />
 
+
+
+  <files id="libavcodec">
+    <!-- Add headers to search path. -->
+    <compilerflag value="-Iinclude" />
+    <compilerflag value="-I${LIBFFMPEG_SRC}" />
+    <!-- Provide stdatomic.h -->
+    <compilerflag value="-I${LIBFFMPEG_SRC}/compat/atomics/dummy" />
+
+    <compilerflag value="-D_ISOC99_SOURCE" />
+    <compilerflag value="-D_FILE_OFFSET_BITS=64" />
+    <compilerflag value="-D_LARGEFILE_SOURCE" />
+    <compilerflag value="-DPIC" />
+    <compilerflag value="-DZLIB_CONST" />
+    <compilerflag value="-DHAVE_AV_CONFIG_H" />
+    <compilerflag value="-D_GNU_SOURCE=1" />
+    <compilerflag value="-D_THREAD_SAFE" />
+
+    <!-- Provide function defitions for all functions needed for libavcodec. -->
+    <file name="${LIBFFMPEG_SRC}/libavcodec/version.c" />
+  </files>
+
+  <files id="libavformat">
+    <!-- Add headers to search path. -->
+    <compilerflag value="-Iinclude" />
+    <compilerflag value="-I${LIBFFMPEG_SRC}" />
+    <!-- Provide stdatomic.h -->
+    <compilerflag value="-I${LIBFFMPEG_SRC}/compat/atomics/dummy" />
+
+    <compilerflag value="-D_ISOC99_SOURCE" />
+    <compilerflag value="-D_FILE_OFFSET_BITS=64" />
+    <compilerflag value="-D_LARGEFILE_SOURCE" />
+    <compilerflag value="-DPIC" />
+    <compilerflag value="-DZLIB_CONST" />
+    <compilerflag value="-DHAVE_AV_CONFIG_H" />
+    <compilerflag value="-D_GNU_SOURCE=1" />
+    <compilerflag value="-D_THREAD_SAFE" />
+    <compilerflag value="-DWIN32" if="windows" />
+    <compilerflag value="-Dinline=__inline" if="windows" />
+
+    <!-- Provide function defitions for all functions needed for libavformat. -->
+
+  </files>
+
+  <files id="libavutil">
+    <!-- Add headers to search path. -->
+    <compilerflag value="-Iinclude" />
+    <compilerflag value="-I${LIBFFMPEG_SRC}" />
+    <!-- Provide stdatomic.h -->
+    <compilerflag value="-I${LIBFFMPEG_SRC}/compat/atomics/dummy" />
+
+    <compilerflag value="-D_ISOC99_SOURCE" />
+    <compilerflag value="-D_FILE_OFFSET_BITS=64" />
+    <compilerflag value="-D_LARGEFILE_SOURCE" />
+    <compilerflag value="-DPIC" />
+    <compilerflag value="-DZLIB_CONST" />
+    <compilerflag value="-DHAVE_AV_CONFIG_H" />
+    <compilerflag value="-D_GNU_SOURCE=1" />
+    <compilerflag value="-D_THREAD_SAFE" />
+
+    <!-- Provide function defitions for all functions needed for libavutil. -->
+
+  </files>
+
   <!-- extension-ffmpeg's CFFI interface code -->
   <files id="core">
     <!-- Add headers to search path. -->
@@ -47,47 +111,27 @@
       - Version.cpp: Versioning and debug information.
     -->
     <file name="common/Core.cpp" />
-    <file name="common/Format.cpp" />
     <file name="common/Structures.cpp" />
     <file name="common/Version.cpp" />
+
+    <!-- NOTE: This one can't build without linking the shared library? -->
+    <!--<file name="common/Format.cpp" />-->
   </files>
 
   <!-- The target NDLL file. -->
   <target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
     <outdir name="${OUTPUT_DIR}/${BINDIR}" />
 
-    <echo value="Building NDLL target..." />
-
+    <files id="libavcodec" />
+    <files id="libavformat" />
+    <files id="libavutil" />
     <files id="core" />
 
     <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
     
-		<section if="windows HXCPP_M32" >
-      <echo value="Building 32-bit extension-ffmpeg..." />
-      <lib name="${LIBFFMPEG_BUILD}/avcodec.lib" />
-      <lib name="${LIBFFMPEG_BUILD}/avformat.lib" />
-      <lib name="${LIBFFMPEG_BUILD}/avutil.lib" />
-		</section>
-		
-		<section if="windows HXCPP_M64" >
-      <echo value="Building 64-bit extension-ffmpeg..." />
-      <lib name="${LIBFFMPEG_BUILD}/avcodec.lib" />
-      <lib name="${LIBFFMPEG_BUILD}/avformat.lib" />
-      <lib name="${LIBFFMPEG_BUILD}/avutil.lib" />
-		</section>
-
-
     <section unless="static_link">
       <ext value=".so" />
       <ext value=".ndll" if="windows || mac || linux" />
-
-      <!--
-        <lib name="libavfilter.a" if="windows"/>
-        <lib name="${LIBFFMPEG_BUILD}/libavdevice.a" if="windows"/>
-        <lib name="libiconv.a" if="windows"/>
-        <lib name="libswresample.a" if="windows"/>
-        <lib name="libswscale.a" if="windows"/>
-      -->
       
       <lib name="Advapi32.lib" if="windows"/>
       <lib name="bcrypt.lib" if="windows"/>

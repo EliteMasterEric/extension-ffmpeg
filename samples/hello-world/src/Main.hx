@@ -4,6 +4,7 @@
 
 package;
 
+import openfl.display.Sprite;
 import ffmpeg.FFmpegUtil;
 
 class Main extends Sprite {
