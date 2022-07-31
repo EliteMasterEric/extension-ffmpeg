@@ -9,3 +9,4 @@
 /ndll/*
 .DS_Store
 /lib.src/build.log
+#/lib.build/
