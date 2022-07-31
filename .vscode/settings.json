@@ -1,0 +1,8 @@
+{
+  "makefile.extensionOutputFolder": "./.vscode",
+  "files.associations": {
+    "*.json": "jsonc",
+    "internal.h": "c",
+    "reverse.h": "c"
+  }
+}

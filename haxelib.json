@@ -1,0 +1,11 @@
+{
+  "name": "extension-ffmpeg",
+  "license": "MIT",
+  "tags": ["openfl","cpp","neko","webm","mkv","vp8","vorbis","audio","video","formats"],
+  "description": "Support for decoding common audio and video formats.",
+  "contributors": ["MasterEric"],
+  "releasenote": "Alpha release",
+  "version": "0.0.1",
+  "url": "https://github.com/MasterEric/extension-ffmpeg",
+  "dependencies": {}
+}
