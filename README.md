@@ -8,7 +8,16 @@ Contributions are highly welcome! Feel free to open an issue or pull request if 
 
 ## Building on Windows
 
-https://trac.ffmpeg.org/wiki/CompilationGuide/CrossCompilingForWindows
+To build `extension-ffmpeg` from source, install these dependencies:
+1. Install Visual Studio 2019, installing the following components:
+- `MSVC v142 - VS 2019 C++ x64/x86 build tools`
+- `Windows SDK (10.0.17763.0)`
+2. Install MSYS2.
+
+Then, follow these steps:
+1. Open `x64 Native Tools Command Prompt for VS 2019` and call `"C:\CPP\msys64\msys2_shell.cmd" -use-full-path`.
+2. Call `pacman -Su git wget make tar unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake autoconf automake libtool mingw-w64-x86_64-jq python zstd nasm` (one-time step).
+3. Navigate to the project folder and run `./lib.src/build_winmsys.sh`.
 
 This will generate the necessary `.a` files that you need to build the extension.
 

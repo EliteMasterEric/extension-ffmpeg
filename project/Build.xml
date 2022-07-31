@@ -8,8 +8,11 @@
   <set name="LIBSUFFIX" value="${HX_TARGET_SUFFIX}" if="HX_TARGET_SUFFIX" />
   <set name="LIBSUFFIX" value="${LIBEXTRA}" unless="LIBSUFFIX" />
 
+  <set name="ndll-tool" value="dll" unless="iphone"/>
+  <set name="ndll-tool" value="static" if="iphone"/>
+
   <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
-  <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows64" />
+  <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows" />
 
   <!-- Include HXCPP common build flags. -->
   <include name="${HXCPP}/build-tool/BuildCommon.xml" />
@@ -30,6 +33,7 @@
     <compilerflag value="-DHAVE_AV_CONFIG_H" />
     <compilerflag value="-D_GNU_SOURCE=1" />
     <compilerflag value="-D_THREAD_SAFE" />
+    <compilerflag value="-Dinline=__inline" if="windows" />
 
     <!-- Dependencies of CFFI. -->
     <depend name="${HXCPP}/include/hx/Macros.h" />
@@ -48,148 +52,46 @@
     <file name="common/Version.cpp" />
   </files>
 
-  <files id="libavcodec">
-    <!-- Add headers to search path. -->
-    <compilerflag value="-Iinclude" />
-    <compilerflag value="-I${LIBFFMPEG_SRC}" />
-    <!-- Provide stdatomic.h -->
-    <compilerflag value="-I${LIBFFMPEG_SRC}/compat/atomics/dummy" />
-
-    <compilerflag value="-D_ISOC99_SOURCE" />
-    <compilerflag value="-D_FILE_OFFSET_BITS=64" />
-    <compilerflag value="-D_LARGEFILE_SOURCE" />
-    <compilerflag value="-DPIC" />
-    <compilerflag value="-DZLIB_CONST" />
-    <compilerflag value="-DHAVE_AV_CONFIG_H" />
-    <compilerflag value="-D_GNU_SOURCE=1" />
-    <compilerflag value="-D_THREAD_SAFE" />
-
-    <!-- Provide function defitions for all functions needed for libavcodec. -->
-    <file name="${LIBFFMPEG_SRC}/libavcodec/allcodecs.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/avcodec.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/avpacket.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/bitstream_filters.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/bsf.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/codec_desc.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/codec_par.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/pthread_frame.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/pthread.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/decode.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/encode.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/get_buffer.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/options.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/profiles.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/parser.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/parsers.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/raw.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/utils.c" />
-    <file name="${LIBFFMPEG_SRC}/libavcodec/version.c" />
-  </files>
-
-  <files id="libavformat">
-    <!-- Add headers to search path. -->
-    <compilerflag value="-Iinclude" />
-    <compilerflag value="-I${LIBFFMPEG_SRC}" />
-    <!-- Provide stdatomic.h -->
-    <compilerflag value="-I${LIBFFMPEG_SRC}/compat/atomics/dummy" />
-
-    <compilerflag value="-D_ISOC99_SOURCE" />
-    <compilerflag value="-D_FILE_OFFSET_BITS=64" />
-    <compilerflag value="-D_LARGEFILE_SOURCE" />
-    <compilerflag value="-DPIC" />
-    <compilerflag value="-DZLIB_CONST" />
-    <compilerflag value="-DHAVE_AV_CONFIG_H" />
-    <compilerflag value="-D_GNU_SOURCE=1" />
-    <compilerflag value="-D_THREAD_SAFE" />
-
-    <!-- Provide function defitions for all functions needed for libavformat. -->
-    <file name="${LIBFFMPEG_SRC}/libavformat/allformats.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/avformat.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/avio.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/id3v2.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/aviobuf.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/demux_utils.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/demux.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/dump.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/os_support.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/id3v1.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/metadata.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/network.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/format.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/options.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/protocols.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/seek.c" />
-    <file name="${LIBFFMPEG_SRC}/libavformat/utils.c" />
-  </files>
-
-  <files id="libavutil">
-    <!-- Add headers to search path. -->
-    <compilerflag value="-Iinclude" />
-    <compilerflag value="-I${LIBFFMPEG_SRC}" />
-    <!-- Provide stdatomic.h -->
-    <compilerflag value="-I${LIBFFMPEG_SRC}/compat/atomics/dummy" />
-
-    <compilerflag value="-D_ISOC99_SOURCE" />
-    <compilerflag value="-D_FILE_OFFSET_BITS=64" />
-    <compilerflag value="-D_LARGEFILE_SOURCE" />
-    <compilerflag value="-DPIC" />
-    <compilerflag value="-DZLIB_CONST" />
-    <compilerflag value="-DHAVE_AV_CONFIG_H" />
-    <compilerflag value="-D_GNU_SOURCE=1" />
-    <compilerflag value="-D_THREAD_SAFE" />
-
-    <!-- Provide function defitions for all functions needed for libavutil. -->
-    <file name="${LIBFFMPEG_SRC}/libavutil/avsscanf.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/avstring.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/bprint.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/buffer.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/channel_layout.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/random_seed.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/crc.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/sha.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/dict.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/reverse.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/display.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/error.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/eval.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/hwcontext_d3d11va.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/hwcontext_dxva2.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/fifo.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/frame.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/hwcontext.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/imgutils.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/log.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/mathematics.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/mem.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/opt.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/parseutils.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/pixdesc.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/rational.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/samplefmt.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/spherical.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/stereo3d.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/time.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/timecode.c" />
-    <file name="${LIBFFMPEG_SRC}/libavutil/utils.c" />
-  </files>
-
   <!-- The target NDLL file. -->
   <target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
     <outdir name="${OUTPUT_DIR}/${BINDIR}" />
 
+    <echo value="Building NDLL target..." />
+
     <files id="core" />
-    <files id="libavcodec" />
-    <files id="libavutil" />
-    <files id="libavformat" />
 
     <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
+    
+		<section if="windows HXCPP_M32" >
+      <echo value="Building 32-bit extension-ffmpeg..." />
+      <lib name="${LIBFFMPEG_BUILD}/avcodec.lib" />
+      <lib name="${LIBFFMPEG_BUILD}/avformat.lib" />
+      <lib name="${LIBFFMPEG_BUILD}/avutil.lib" />
+		</section>
+		
+		<section if="windows HXCPP_M64" >
+      <echo value="Building 64-bit extension-ffmpeg..." />
+      <lib name="${LIBFFMPEG_BUILD}/avcodec.lib" />
+      <lib name="${LIBFFMPEG_BUILD}/avformat.lib" />
+      <lib name="${LIBFFMPEG_BUILD}/avutil.lib" />
+		</section>
+
 
     <section unless="static_link">
-
       <ext value=".so" />
       <ext value=".ndll" if="windows || mac || linux" />
 
-      <!-- Link the "pthread" GCC library. -->
+      <!--
+        <lib name="libavfilter.a" if="windows"/>
+        <lib name="${LIBFFMPEG_BUILD}/libavdevice.a" if="windows"/>
+        <lib name="libiconv.a" if="windows"/>
+        <lib name="libswresample.a" if="windows"/>
+        <lib name="libswscale.a" if="windows"/>
+      -->
+      
+      <lib name="Advapi32.lib" if="windows"/>
+      <lib name="bcrypt.lib" if="windows"/>
+      <lib name="Ws2_32.lib" if="windows"/>
       <lib name="-lpthread" if="linux" />
     </section>
   </target>

@@ -6,6 +6,7 @@
 - https://stackoverflow.com/questions/8403229/ffmpeg-api-compiling-with-specific-formats
 - https://stackoverflow.com/questions/50622515/what-encoders-decoders-muxers-demuxers-parsers-do-i-need-to-enable-in-ffmpeg-for
 - http://howto-pages.org/ffmpeg/#build
+- https://stackoverflow.com/questions/40061101/how-to-access-windows-enviroment-variables-on-msys
 
 ## CFFI Libraries
 - https://github.com/MattTuttle/Audaxe/blob/fa327e4ac959f5bd528bff626ccb005f395ad2f3/project/common/ExternalInterface.cpp
