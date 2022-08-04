@@ -4,9 +4,9 @@
 
 package;
 
+import ffmpeg.Media;
+import ffmpeg.Version;
 import openfl.display.Sprite;
-import ffmpeg.FFmpegUtil;
-import ffmpeg.Video;
 
 class Main extends Sprite {
   public function new () {
@@ -19,22 +19,26 @@ class Main extends Sprite {
 
   public static function printVersionInfo():Void {
     trace('Welcome to extension-ffmpeg.');
-    trace('libavcodec version: ' + FFmpegUtil.getLibavcodecVersion());
-    trace('libavformat version: ' + FFmpegUtil.getLibavformatVersion());
-    trace('libavutil version: ' + FFmpegUtil.getLibavutilVersion());
-    trace('libavfilter version: ' + FFmpegUtil.getLibavfilterVersion());
-    trace('libswresample version: ' + FFmpegUtil.getLibswresampleVersion());
-    trace('libswscale version: ' + FFmpegUtil.getLibswscaleVersion());
-    trace('avcodec_configuration: ' + FFmpegUtil.getAvcodecConfiguration());
-    trace('avcodec_license: ' + FFmpegUtil.getAvcodecLicense());
+    trace('libavcodec version: ' + Version.getLibavcodecVersion());
+    trace('libavformat version: ' + Version.getLibavformatVersion());
+    trace('libavutil version: ' + Version.getLibavutilVersion());
+    trace('libavfilter version: ' + Version.getLibavfilterVersion());
+    trace('libswresample version: ' + Version.getLibswresampleVersion());
+    trace('libswscale version: ' + Version.getLibswscaleVersion());
+    trace('avcodec_configuration: ' + Version.getAvcodecConfiguration());
+    trace('avcodec_license: ' + Version.getAvcodecLicense());
 
-    var context = Video.buildContext();
-    trace('Was context defined? ' + (context != null));
-    var resultA = Video.openFile(context, "assets/earth.mp4");
-    trace('Open file success? ' + (resultA));
-    var resultB = Video.streamInfo(context);
-    trace('Find stream info success? ' + (resultB));
+    trace('===========================================================');
 
+    var filePath:String = "file:assets/earth.mp4";
+
+    trace('Opening file: ' + filePath);
+    var media = new Media();
+    media.openInput(filePath);
+    trace('Open file success.');
+    media.fetchStreamInfo();
+    trace('Find stream info success.');
+    media.dumpFormat();
   }
 
   public static function quit():Void {

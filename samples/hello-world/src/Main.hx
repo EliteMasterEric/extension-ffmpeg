@@ -5,7 +5,7 @@
 package;
 
 import openfl.display.Sprite;
-import ffmpeg.FFmpegUtil;
+import ffmpeg.Version;
 
 class Main extends Sprite {
   public function new () {
@@ -18,14 +18,14 @@ class Main extends Sprite {
 
   public static function printVersionInfo():Void {
     trace('Welcome to extension-ffmpeg.');
-    trace('libavcodec version: ' + FFmpegUtil.getLibavcodecVersion());
-    trace('libavformat version: ' + FFmpegUtil.getLibavformatVersion());
-    trace('libavutil version: ' + FFmpegUtil.getLibavutilVersion());
-    trace('libavfilter version: ' + FFmpegUtil.getLibavfilterVersion());
-    trace('libswresample version: ' + FFmpegUtil.getLibswresampleVersion());
-    trace('libswscale version: ' + FFmpegUtil.getLibswscaleVersion());
-    trace('avcodec_configuration: ' + FFmpegUtil.getAvcodecConfiguration());
-    trace('avcodec_license: ' + FFmpegUtil.getAvcodecLicense());
+    trace('libavcodec version: ' + Version.getLibavcodecVersion());
+    trace('libavformat version: ' + Version.getLibavformatVersion());
+    trace('libavutil version: ' + Version.getLibavutilVersion());
+    trace('libavfilter version: ' + Version.getLibavfilterVersion());
+    trace('libswresample version: ' + Version.getLibswresampleVersion());
+    trace('libswscale version: ' + Version.getLibswscaleVersion());
+    trace('avcodec_configuration: ' + Version.getAvcodecConfiguration());
+    trace('avcodec_license: ' + Version.getAvcodecLicense());
   }
 
   public static function quit():Void {

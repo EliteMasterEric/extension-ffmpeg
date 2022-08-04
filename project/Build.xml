@@ -12,12 +12,39 @@
   <set name="ndll-tool" value="static" if="iphone"/>
 
   <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
-  <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows" />
 
   <!-- Include HXCPP common build flags. -->
   <include name="${HXCPP}/build-tool/BuildCommon.xml" />
 
+  <echo value="==========================" />
   <echo value="Building extension-ffmpeg..." />
+
+  <section if="windows HXCPP_M32">
+    <echo value="Target platform: Windows (x32)" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows32" />
+  </section> 
+
+  <section if="windows HXCPP_M64">
+    <echo value="Target platform: Windows (x64)" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows64" />
+  </section>
+
+  <section if="linux HXCPP_M32">
+    <echo value="Target platform: Linux (x32)" />
+    <echo value="WARNING: Build currently disabled on this platform!" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Linux32" />
+  </section>
+  
+  <section if="linux HXCPP_M64">
+    <echo value="Target platform: Linux (x64)" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Linux64" />
+  </section>
+
+  <echo value="==========================" />
 
   <!-- extension-ffmpeg's CFFI interface code -->
   <files id="core">
@@ -33,7 +60,6 @@
     <compilerflag value="-DHAVE_AV_CONFIG_H" />
     <compilerflag value="-D_GNU_SOURCE=1" />
     <compilerflag value="-D_THREAD_SAFE" />
-    <compilerflag value="-Dinline=__inline" if="windows" />
 
     <!-- Dependencies of CFFI. -->
     <depend name="${HXCPP}/include/hx/Macros.h" />
@@ -47,32 +73,53 @@
       - Version.cpp: Versioning and debug information.
     -->
     <file name="common/Core.cpp" />
+    <file name="common/Error.cpp" />
+    <file name="common/Format.cpp" />
     <file name="common/Structures.cpp" />
     <file name="common/Version.cpp" />
-
+    
     <!-- NOTE: This one can't build without linking the shared library? -->
-    <!--<file name="common/Format.cpp" />-->
   </files>
 
   <!-- The target NDLL file. -->
   <target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
     <outdir name="${OUTPUT_DIR}/${BINDIR}" />
 
-    <lib name="avcodec.lib" />
-    <lib name="avformat.lib" />
-    <lib name="avutil.lib" />
-
-    <files id="core" />
-
-    <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
-    
     <ext value=".so" />
-    <ext value=".ndll" if="windows || mac || linux" />
 
-    <lib name="Advapi32.lib" if="windows"/>
-    <lib name="bcrypt.lib" if="windows"/>
-    <lib name="Ws2_32.lib" if="windows"/>
-    <lib name="-lpthread" if="linux" />
+    <section if="windows">
+      <ext value=".ndll" />
+
+      <!-- TODO: Readd from working build.xml -->
+      <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
+      
+      <files id="core" />
+    </section>
+
+    <section if="linux">
+      <ext value=".ndll" />
+
+      <flag value="-L/usr/lib" />
+      <flag value="-L${LIBFFMPEG_BUILD}" />
+
+      <!-- TODO: Fix on x32 (add docker builder?) -->
+
+      <lib name="-lavcodec" />
+      <lib name="-lavformat" />
+      <lib name="-lavutil" />
+
+      <section if="HXCPP_M64">
+        <files id="core" />
+      </section>
+    </section>
+    
+    <section if="mac">
+      <!-- TODO: Resolve issues. -->
+      <ext value=".ndll" />
+    </section>
+
+    <section if="android">
+    </section>
   </target>
 
   <!-- Redirect to the NDLL target if unspecified. -->
