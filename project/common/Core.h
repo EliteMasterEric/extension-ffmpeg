@@ -1,7 +1,7 @@
 /**
  * @file Core.h
  * @author MasterEric
- * @brief Defines shared types and functions used in the rest of the project. 
+ * @brief Defines shared types and functions used in the rest of the project.
  */
 
 #ifndef EXT_FFMPEG_CORE
@@ -20,16 +20,17 @@
 // Library includes
 extern "C"
 {
-  #include <libavcodec/avcodec.h>
-  #include <libavformat/avformat.h>
-
-  #include <libavcodec/version.h>
-  #include <libavformat/version.h>
-  #include <libavutil/version.h>
-  #include <libavfilter/version.h>
-  #include <libswresample/version.h>
-  #include <libswscale/version.h>
+#include <libavcodec/avcodec.h>
+#include <libavfilter/version.h>
+#include <libavformat/avformat.h>
+#include <libavutil/avutil.h>
+#include <libavutil/imgutils.h>
+#include <libswresample/version.h>
+#include <libswscale/swscale.h>
+#include <libswscale/version.h>
 }
+
+#define FFMPEG_PIXEL_FORMAT AV_PIX_FMT_BGRA
 
 // Only include IMPLEMENT_API in ONE .cpp file.
 // Otherwise you get a linker error.
@@ -65,6 +66,10 @@ typedef uint64 uint64_t;
   value NAME(__VA_ARGS__);            \
   DEFINE_PRIM(NAME, COUNT);           \
   value NAME(__VA_ARGS__)
+#define DEFINE_FUNC(COUNT, NAME, ...) \
+  value NAME(__VA_ARGS__);            \
+  DEFINE_PRIM(NAME, COUNT);           \
+  value NAME(__VA_ARGS__)
 #define DEFINE_FUNC_0(NAME) DEFINE_FUNC(0, NAME)
 #define DEFINE_FUNC_1(NAME, PARAM1) DEFINE_FUNC(1, NAME, value PARAM1)
 #define DEFINE_FUNC_2(NAME, PARAM1, PARAM2) DEFINE_FUNC(2, NAME, value PARAM1, value PARAM2)
@@ -72,21 +77,56 @@ typedef uint64 uint64_t;
 #define DEFINE_FUNC_4(NAME, PARAM1, PARAM2, PARAM3, PARAM4) DEFINE_FUNC(4, NAME, value PARAM1, value PARAM2, value PARAM3, value PARAM4)
 #define DEFINE_FUNC_5(NAME, PARAM1, PARAM2, PARAM3, PARAM4, PARAM5) DEFINE_FUNC(5, NAME, value PARAM1, value PARAM2, value PARAM3, value PARAM4, value PARAM5)
 
+// Prime notes:
+// 
+// int: "i"
+// float: "f"
+// char*: "c"
+// value (Dynamic): "o"
+// Haxe string: "s"
+// void: "v"
+// 
+// DEFINE_PRIME1(NAME) for a function with 1 argument
+// DEFINE_PRIME1v(NAME) for a function with 1 argument and a void return type
+
 /**
- * An FFmpegContext struct represents the state of a given video or audio stream.
+ * An FFmpegContext struct represents the state of a given media stream.
  * A new one is created when a file is loaded, and accumulates and caches
  * information about the stream as it becomes needed.
  */
-typedef struct {
-	AVFormatContext* avFormatCtx;
-} FFmpegContext;
+typedef struct
+{
+  // The format context.
+  AVFormatContext *avFormatCtx = NULL;
 
-/**
- * @brief Throws an exception in Haxe.
- * 
- * @param message The message to send.
- */
-void hx_throw_exception(const char* message);
+  // Information about the video stream.
+  int videoStreamIndex;
+  AVStream *videoStream = NULL;
+  const AVCodec *videoCodec = NULL;
+  AVCodecContext *videoCodecCtx = NULL;
+
+  // Information about the audio stream.
+  int audioStreamIndex;
+  AVStream *audioStream = NULL;
+  const AVCodec *audioCodec = NULL;
+  AVCodecContext *audioCodecCtx = NULL;
+
+  // Information about the subtitle stream.
+  int subtitleStreamIndex;
+  AVStream *subtitleStream = NULL;
+  const AVCodec *subtitleCodec = NULL;
+  AVCodecContext *subtitleCodecCtx = NULL;
+
+  // Space for the latest video frame and the converted frame.
+  AVFrame *videoFrame = NULL;
+  AVFrame *videoFrameRGB = NULL;
+  uint8_t *videoFrameRGBBuffer = NULL;
+  AVPacket *avPacket = NULL;
+
+  // The software scaler context.
+  struct SwsContext *swsCtx = NULL;
+
+} FFmpegContext;
 
 /**
  * @brief Called when the library is instantiated.
@@ -98,12 +138,27 @@ extern "C" void initialize();
  */
 void initialize_Structures();
 
+//
 // Define functions here to share them throughout the project.
-bool is_FFmpegContext(value v);
-FFmpegContext* FFmpegContext_unwrap(value input);
+//
 
-// Make sure the value below are defined only once.
+/**
+ * @brief Throws an exception in Haxe.
+ *
+ * @param message The message to send.
+ */
+int FFmpegContext_init_swsCtx(FFmpegContext *context);
+int FFmpeg_emit_video_frame(FFmpegContext *context, value callback);
+int FFmpeg_emit_audio_frame(FFmpegContext *context, value callback);
+// int FFmpeg_emit_subtitle_frame(FFmpegContext *context, value callback);
+void hx_throw_exception(const char *message);
+bool is_FFmpegContext(value v);
+FFmpegContext *FFmpegContext_unwrap(value input);
+
 #if defined(FFMPEG_CORE_CPP)
+//
+// Define functions here to use them ONLY in Core.cpp.
+//
 DEFINE_ENTRY_POINT(initialize);
 #endif
 

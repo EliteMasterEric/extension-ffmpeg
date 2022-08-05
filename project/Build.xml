@@ -68,17 +68,23 @@
     <!--
       The CFFI interface source.
       Split into multiple files for organizational purposes.
+      - Codec.cpp: Initialize and work with codecs.
       - Core.cpp: Generic important functions such as initialization.
-      - Structures.cpp: Initialize data structures.
+      - Error.cpp: Error handling and interpretation.
+      - Format.cpp: Open input and parse file formats.
+      - Structures.cpp: Initialize and free data structures.
       - Version.cpp: Versioning and debug information.
     -->
+    <file name="common/Codec.cpp" />
     <file name="common/Core.cpp" />
+    <file name="common/DecodeAudio.cpp" />
+    <file name="common/DecodeMedia.cpp" />
+    <file name="common/DecodeVideo.cpp" />
     <file name="common/Error.cpp" />
     <file name="common/Format.cpp" />
+    <file name="common/SoftwareScale.cpp" />
     <file name="common/Structures.cpp" />
     <file name="common/Version.cpp" />
-    
-    <!-- NOTE: This one can't build without linking the shared library? -->
   </files>
 
   <!-- The target NDLL file. -->
@@ -105,8 +111,12 @@
       <!-- TODO: Fix on x32 (add docker builder?) -->
 
       <lib name="-lavcodec" />
+      <lib name="-lavdevice" />
+      <lib name="-lavfilter" />
       <lib name="-lavformat" />
       <lib name="-lavutil" />
+      <lib name="-lswresample" />
+      <lib name="-lswscale" />
 
       <section if="HXCPP_M64">
         <files id="core" />

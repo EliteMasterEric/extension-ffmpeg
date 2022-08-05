@@ -9,4 +9,4 @@
 
 #include "Core.h"
 
-#endif // EXT_FFMPEG_STRUCTURES
+#endif // EXT_FFMPEG_FORMAT

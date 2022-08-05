@@ -9,4 +9,4 @@
 
 #include "Core.h"
 
-#endif
+#endif // EXT_FFMPEG_ERROR
