@@ -60,9 +60,34 @@ FFmpegContext *FFmpegContext_create()
 {
   FFmpegContext *contextPointer = (FFmpegContext *)malloc(sizeof(FFmpegContext));
 
+  // We must ensure all values are initialized to prevent comparision errors.
+
+  contextPointer->videoStreamIndex = -1;
+  contextPointer->videoStream = nullptr;
+  contextPointer->videoCodec = nullptr;
+  contextPointer->videoCodecCtx = nullptr;
+
+  contextPointer->audioStreamIndex = -1;
+  contextPointer->audioStream = nullptr;
+  contextPointer->audioCodec = nullptr;
+  contextPointer->audioCodecCtx = nullptr;
+
+  contextPointer->subtitleStreamIndex = -1;
+  contextPointer->subtitleStream = nullptr;
+  contextPointer->subtitleCodec = nullptr;
+  contextPointer->subtitleCodecCtx = nullptr;
+
   contextPointer->videoFrame = av_frame_alloc();
   contextPointer->videoFrameRGB = av_frame_alloc();
-  contextPointer->avPacket = av_packet_alloc();
+  contextPointer->videoFrameRGBBuffer = nullptr;
+ 
+  contextPointer->audioFrame = av_frame_alloc();
+  contextPointer->audioOutputBuffer = NULL;
+  contextPointer->audioOutputChannelLayout = AV_CHANNEL_LAYOUT_STEREO;
+  contextPointer->emitAudioCallback = NULL;
+
+  contextPointer->swsCtx = nullptr;
+  contextPointer->swrCtx = nullptr;
 
   return contextPointer;
 }
@@ -85,6 +110,7 @@ void FFmpegContext_close(FFmpegContext *context)
   av_free(context->videoFrameRGBBuffer);
   av_free(context->videoFrameRGB);
   av_free(context->videoFrame);
+  av_free(context->audioFrame);
 
   // Close the video codec.
   avcodec_close(context->videoCodecCtx);

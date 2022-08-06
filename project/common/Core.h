@@ -21,16 +21,30 @@
 extern "C"
 {
 #include <libavcodec/avcodec.h>
+#include <libavcodec/version.h>
+
+#include <libavdevice/avdevice.h>
+#include <libavdevice/version.h>
+
+#include <libavfilter/avfilter.h>
 #include <libavfilter/version.h>
+
 #include <libavformat/avformat.h>
+#include <libavformat/version.h>
+
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
+
+#include <libswresample/swresample.h>
 #include <libswresample/version.h>
+
 #include <libswscale/swscale.h>
 #include <libswscale/version.h>
 }
 
 #define FFMPEG_PIXEL_FORMAT AV_PIX_FMT_BGRA
+#define FFMPEG_BITRATE 44100
+#define FFMPEG_CHANNEL_LAYOUT AV_CHANNEL_LAYOUT_STEREO
 
 // Only include IMPLEMENT_API in ONE .cpp file.
 // Otherwise you get a linker error.
@@ -97,34 +111,42 @@ typedef uint64 uint64_t;
 typedef struct
 {
   // The format context.
-  AVFormatContext *avFormatCtx = NULL;
+  AVFormatContext *avFormatCtx = nullptr;
 
   // Information about the video stream.
   int videoStreamIndex;
-  AVStream *videoStream = NULL;
-  const AVCodec *videoCodec = NULL;
-  AVCodecContext *videoCodecCtx = NULL;
+  AVStream *videoStream;
+  const AVCodec *videoCodec;
+  AVCodecContext *videoCodecCtx;
 
   // Information about the audio stream.
   int audioStreamIndex;
-  AVStream *audioStream = NULL;
-  const AVCodec *audioCodec = NULL;
-  AVCodecContext *audioCodecCtx = NULL;
+  AVStream *audioStream;
+  const AVCodec *audioCodec;
+  AVCodecContext *audioCodecCtx;
 
   // Information about the subtitle stream.
   int subtitleStreamIndex;
-  AVStream *subtitleStream = NULL;
-  const AVCodec *subtitleCodec = NULL;
-  AVCodecContext *subtitleCodecCtx = NULL;
+  AVStream *subtitleStream;
+  const AVCodec *subtitleCodec;
+  AVCodecContext *subtitleCodecCtx;
 
   // Space for the latest video frame and the converted frame.
-  AVFrame *videoFrame = NULL;
-  AVFrame *videoFrameRGB = NULL;
-  uint8_t *videoFrameRGBBuffer = NULL;
-  AVPacket *avPacket = NULL;
+  AVFrame *videoFrame;
+  AVFrame *videoFrameRGB;
+  uint8_t *videoFrameRGBBuffer;
 
+  // Space for the latest audio frame and the converted frame.
+  AVFrame *audioFrame;
+  buffer audioOutputBuffer;
+  AVChannelLayout audioOutputChannelLayout;
+  value emitAudioCallback;
+  
   // The software scaler context.
-  struct SwsContext *swsCtx = NULL;
+  struct SwsContext *swsCtx;
+
+  // The software resampler context.
+  struct SwrContext *swrCtx;
 
 } FFmpegContext;
 
@@ -148,9 +170,10 @@ void initialize_Structures();
  * @param message The message to send.
  */
 int FFmpegContext_init_swsCtx(FFmpegContext *context);
-int FFmpeg_emit_video_frame(FFmpegContext *context, value callback);
+int FFmpegContext_sws_scale_video_frame(FFmpegContext *context);
+int FFmpegContext_init_swrCtx(FFmpegContext *context);
+int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context);
 int FFmpeg_emit_audio_frame(FFmpegContext *context, value callback);
-// int FFmpeg_emit_subtitle_frame(FFmpegContext *context, value callback);
 void hx_throw_exception(const char *message);
 bool is_FFmpegContext(value v);
 FFmpegContext *FFmpegContext_unwrap(value input);

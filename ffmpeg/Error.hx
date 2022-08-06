@@ -66,19 +66,19 @@ enum FFmpegError {
 }
 
 class Error {
-  static final FFMPEG_NO_PERMISSION = -1; // EPERM
-  static final FFMPEG_MEDIA_NOT_FOUND = -2; // ENOENT
+  public static final FFMPEG_NO_PERMISSION = -1; // EPERM
+  public static final FFMPEG_MEDIA_NOT_FOUND = -2; // ENOENT
 
-  static final FFMPEG_TRY_AGAIN = -11; // EAGAIN
+  public static final FFMPEG_TRY_AGAIN = -11; // EAGAIN
 
-  static final AVERROR_PROTOCOL_NOT_FOUND = buildErrorCode(null, 'P', 'R', 'O');
-  static final AVERROR_STREAM_NOT_FOUND = buildErrorCode(null, 'S', 'T', 'R');
-  static final AVERROR_END_OF_FILE = buildErrorCode('E', 'O', 'F', ' ');
-  static final AVERROR_INVALID_DATA = buildErrorCode('I', 'N', 'D', 'A');
-  static final AVERROR_DECODER_NOT_FOUND = buildErrorCode(null, 'D', 'E', 'C');
-  static final AVERROR_ENCODER_NOT_FOUND = buildErrorCode(null, 'E', 'N', 'C');
-  static final AVERROR_DEMUXER_NOT_FOUND = buildErrorCode(null, 'D', 'E', 'M');
-  static final AVERROR_MUXER_NOT_FOUND = buildErrorCode(null, 'M', 'U', 'X');
+  public static final AVERROR_PROTOCOL_NOT_FOUND = buildErrorCode(null, 'P', 'R', 'O');
+  public static final AVERROR_STREAM_NOT_FOUND = buildErrorCode(null, 'S', 'T', 'R');
+  public static final AVERROR_END_OF_FILE = buildErrorCode('E', 'O', 'F', ' ');
+  public static final AVERROR_INVALID_DATA = buildErrorCode('I', 'N', 'D', 'A');
+  public static final AVERROR_DECODER_NOT_FOUND = buildErrorCode(null, 'D', 'E', 'C');
+  public static final AVERROR_ENCODER_NOT_FOUND = buildErrorCode(null, 'E', 'N', 'C');
+  public static final AVERROR_DEMUXER_NOT_FOUND = buildErrorCode(null, 'D', 'E', 'M');
+  public static final AVERROR_MUXER_NOT_FOUND = buildErrorCode(null, 'M', 'U', 'X');
 
   /*
     ESRCH      3

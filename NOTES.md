@@ -22,6 +22,19 @@
  * - Use `val_int()` to get a CPP int from a Haxe int.
  */
 
+## Bytes
+
+- `openfl.utils.ByteArray` is an abstract, it provides simple read/write utilities and conversion functions to `openfl.utils.ByteArrayData`.
+    - To `ByteArrayData`: No conversion needed.
+    - To `Bytes`: Available as implicit cast.
+    - To `BytesData`: Available as implicit cast.
+- `openfl.utils.ByteArrayData` is implemented differently on diffrent platforms. It provides position-based read-write operations.
+    - Use `ByteArray` instead, it provides useful type conversions and casting operations.
+- `haxe.io.Bytes` is a class which wraps a `haxe.io.BytesData`. It acts as a simple array accessor for the underlying `BytesData`.
+    - To `ByteArray`: `ByteArray.fromBytes(value)`
+- `haxe.io.BytesData` is a typedef, which varies by platform. For example, on CPP, it is a `Array<cpp.UInt8>`.
+    - To `ByteArray`: `ByteArray.fromBytesData(value)`
+
 ## Resolving common errors:
 - Symbol defined multiple times - Make sure #define is called only once, check if something is undefined before defining it.
 - LNK2019: unresolved external symbol - Make sure the `.c` file that includes the file is included in the `Build.xml` file.

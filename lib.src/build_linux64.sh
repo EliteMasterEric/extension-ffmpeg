@@ -18,6 +18,9 @@ FLAGS="$FLAGS --logfile=../build.log"
 # Upgrade license to LGPLv3, allowing use of some ApacheV2 licensed dependencies.
 FLAGS="$FLAGS --enable-version3"
 
+# Add HTTPS support.
+FLAGS="$FLAGS --enable-openssl"
+
 pushd ffmpeg
 #make clean &&
 ./configure $FLAGS && make

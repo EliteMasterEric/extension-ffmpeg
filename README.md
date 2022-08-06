@@ -31,10 +31,12 @@ To build the extension itself, run `lime rebuild extension-ffmpeg windows`.
 # Building on Linux
 
 To build `extension-ffmpeg` from source, follow these steps:
-1. Navigate to the project folder.
-2. Call `git submodule update --recursive` to download the source for FFmpeg.
-3. Navigate to `./lib.src/`.
-4. Run `./build_linux64.sh`.
+1. Install these development packages:
+    `libvdpau-dev libva-dev libx11-dev`
+2. Navigate to the project folder.
+3. Call `git submodule update --recursive` to download the source for FFmpeg.
+4. Navigate to `./lib.src/`.
+5. Run `./build_linux64.sh`.
 
 This will generate the necessary `.a` files that you need to build the extension.
 

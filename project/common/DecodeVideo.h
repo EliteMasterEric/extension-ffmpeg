@@ -9,4 +9,6 @@
 
 #include "Core.h"
 
+int copyVideoFrame(AVFrame* videoFrame, char* buffer_ptr, int buffer_size);
+
 #endif // EXT_FFMPEG_DECODEVIDEO

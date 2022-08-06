@@ -5,18 +5,24 @@
 package;
 
 import ffmpeg.Error.FFmpegError;
-import sys.db.ResultSet;
-import openfl.display.Bitmap;
 import ffmpeg.Media;
+import ffmpeg.openfl.OpenFLBitmapVideo;
 import ffmpeg.Version;
-import ffmpeg.openfl.OpenFLVideo;
+import openfl.display.Bitmap;
 import openfl.display.Sprite;
+import openfl.events.KeyboardEvent;
+import openfl.ui.Keyboard;
+import sys.db.ResultSet;
 
 class Main extends Sprite {
   public function new() {
     super();
 
     printVersionInfo();
+
+    loadVideo();
+
+    stage.addEventListener(KeyboardEvent.KEY_DOWN, onKeyPress);
 
     // quit();
   }
@@ -33,65 +39,32 @@ class Main extends Sprite {
     trace('avcodec_license: ' + Version.getAvcodecLicense());
 
     trace('===========================================================');
+  }
 
+  var video:OpenFLBitmapVideo;
+
+  public function loadVideo():Void {
     // var filePath:String = "https://upload.wikimedia.org/wikipedia/commons/c/c5/Limes.webm";
     // var filePath:String = "file:assets/earth.mp4";
     // var filePath:String = "file:assets/Limes.webm";
     // var filePath:String = "file:assets/Limes.webm.srt";
-    var filePath:String = "https://uploads.ungrounded.net/alternate/1528000/1528775_alternate_113347_r88.zip/assets/music/stressCutscene.mp4";
+    var filePath:String = "file:assets/stressCutscene.mp4";
+    // var filePath:String = "https://uploads.ungrounded.net/alternate/1528000/1528775_alternate_113347_r88.zip/assets/music/stressCutscene.mp4";
 
-    trace('Opening file: ' + filePath);
-    var media = new Media();
+    video = new OpenFLBitmapVideo();
+    video.open(filePath);
+    addChild(video);
 
-    media.openInput(filePath);
-    trace('Open file success.');
-    media.fetchStreamInfo();
-    trace('Find stream info success.');
-    media.dumpFormat();
-    trace('Dump format success.');
+    var fps = new openfl.display.FPS(10, 10, 0x000000);
+    addChild(fps);
+  }
 
-    trace('===========================================================');
-
-    trace('hasVideo: ' + media.hasVideo);
-    trace('hasAudio: ' + media.hasAudio);
-    trace('hasSubtitle: ' + media.hasSubtitle);
-
-    trace('===========================================================');
-
-    if (media.hasVideo) {
-      media.initVideoCodec();
-      trace('Init video codec success.');
-
-      trace('videoWidth: ' + media.videoWidth);
-      trace('videoHeight: ' + media.videoHeight);
-
-      media.decodeFrame();
-
-      var bitmap = new Bitmap(media.videoBitmapData);
-
-      addChild(bitmap);
-
-      trace('Decode video frame success.');
-
-      var timer = new haxe.Timer(1000 / 30);
-      timer.run = function() {
-        // Decode frames until we emit a video frame.
-        var result = false;
-        do {
-          try {
-            result = media.decodeFrame();
-          } catch (e:FFmpegError) {
-            switch(e) {
-              case EEndOfFile:
-                trace('End of file.');
-                timer.stop();
-                break;
-              default:
-                throw e;
-            }
-          }
-        } while (result);
-      };
+  function onKeyPress(event:KeyboardEvent) {
+    switch(event.keyCode) {
+      case Keyboard.SPACE:
+        video.play();
+      default:
+        // do nothing
     }
   }
 
