@@ -12,6 +12,7 @@ NDK_CC="$NDKDIR/bin/aarch64-linux-android21-clang"
 NDK_CXX="$NDKDIR/bin/aarch64-linux-android21-clang++"
 NDK_STRIP="$NDKDIR/bin/llvm-strip"
 NDK_NM="$NDKDIR/bin/llvm-nm"
+# No this isnt a mistake lol
 NDK_AS="$NDKDIR/bin/aarch64-linux-android21-clang"
 NDK_AR="$NDKDIR/bin/llvm-ar"
 
