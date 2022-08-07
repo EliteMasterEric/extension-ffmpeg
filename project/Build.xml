@@ -44,6 +44,12 @@
     <set name="LIBFFMPEG_BUILD" value="../lib.build/Linux64" />
   </section>
 
+ <section if="android">
+    <echo value="Target platform: Android (aarch64)" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Android64" />
+  </section>
+
   <echo value="==========================" />
 
   <!-- extension-ffmpeg's CFFI interface code -->
@@ -148,6 +154,29 @@
     </section>
 
     <section if="android">
+      <ext value=".so" />
+
+      <!-- Prioritize local built libs over system libs. -->
+      <flag value="-L${LIBFFMPEG_BUILD}" />
+      <flag value="-L/usr/lib" />
+
+        <lib name="-lbz2" />
+        <lib name="-llzma" />
+        <lib name="-lm" />
+        <lib name="-lz" />
+
+        <!-- ORDER IS IMPORTANT! avformat must be included first. -->
+        <lib name="-lavformat" />
+
+        <lib name="-lavcodec" />
+        <lib name="-lavdevice" />
+        <lib name="-lavfilter" />
+        <lib name="-lavutil" />
+        <lib name="-lswresample" />
+        <lib name="-lswscale" />
+
+        <files id="core" />
+      </section>
     </section>
   </target>
 

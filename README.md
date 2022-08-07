@@ -54,9 +54,25 @@ This will generate the necessary `.a` files that you need to build the extension
 
 To build the extension itself, run `lime rebuild extension-ffmpeg mac`.
 
+## Building for android
+
+To build `extension-ffmpeg` from source, follow these steps:
+1. Download and unzip the android ndk (r23c)
+2. Navigate to the project folder.
+3. Call `git submodule update --recursive` to download the source for FFmpeg.
+4. Navigate to `./lib.src/`.
+5. Change the ndk path in `build_android64` to your ndk path,
+5. Run `./buikd_android64.sh`.
+
+This will generate the necessary `.a` files that you need to build the extension.
+
+To build the extension itself, run `lime rebuild extension-ffmpeg mac`.
+
+this is still on testing
+
 ## Building on Other Platforms
 
-Support for other platforms (MacOS, Android, iOS, HTML5 via emscripten) is in development.
+Support for other platforms (MacOS, iOS, HTML5 via emscripten) is in development.
 
 ## License
 
