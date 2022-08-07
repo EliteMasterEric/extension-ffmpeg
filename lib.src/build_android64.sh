@@ -1,9 +1,12 @@
 # Compiles FFmpeg for Android using MSYS2 and the androidndk (r23c)
 
 # Here we set the android ndk (r23c) llvm toolchain path.
-# You need to choose the folder with your host arch and copy the path and paste it inside there
-NDKDIR="C:/your/ndk/path/here"
+# You need to choose the folder with your host arch
+# And copy the path and paste it inside NDKDIR
+NDKDIR="/your/ndk/path/here"
 
+# If some of the bin locations look weird to you
+# Trust me, it compiles with this
 RANLIB="$NDKDIR/bin/llvm-ranlib"
 CC="$NDKDIR/aarch64-linux-android21-clang"
 CXX="$NDKDIR/aarch64-linux-android21-clang++"
@@ -14,6 +17,8 @@ AR="$NDKDIR/bin/llvm-ar"
 
 # Yep not fancy but it works soo
 FLAGS="--disable-doc --disable-programs --enable-version3 --arch="aarch64" --target-os=android --as="$AS" --cc="$CC" --cxx="$CXX" --strip="$STRIP" --enable-cross-compile  --cross-prefix="$NDKPREFIX" --nm="$NM" --ar="$AR" --ranlib="$RANLIB""
+
+# You can also compile from termux with the ndk with this
 
 pushd ffmpeg
 #make clean &&
