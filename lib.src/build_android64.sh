@@ -18,6 +18,8 @@ NDK_AS="$NDKDIR/bin/aarch64-linux-android21-clang"
 NDK_AR="$NDKDIR/bin/llvm-ar"
 
 # Yep not fancy but it works soo
+# Also the reason to why theres no openssl support 
+# Its because its kinda complex
 FLAGS="--disable-doc --disable-programs --enable-version3 --arch="aarch64" --target-os=android --as="$NDK_AS" --cc="$NDK_CC" --cxx="$NDK_CXX" --strip="$NDK_STRIP" --enable-cross-compile  --cross-prefix="$NDKDIR" --nm="$NDK_NM" --ar="$NDK_AR" --ranlib="$NDK_RANLIB""
 
 # You can also compile from termux with the ndk with this
