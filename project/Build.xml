@@ -44,6 +44,18 @@
     <set name="LIBFFMPEG_BUILD" value="../lib.build/Linux64" />
   </section>
 
+  <section if="mac HXCPP_M64">
+    <echo value="Target platform: Mac (x64)" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Mac64" />
+  </section>
+
+  <section if="mac HXCPP_M32">
+    <echo value="Target platform: Mac (x32)" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Mac32" />
+  </section>
+
   <echo value="==========================" />
 
   <!-- extension-ffmpeg's CFFI interface code -->
@@ -117,6 +129,7 @@
 
       <!-- TODO: Fix on 32-bit systems (add docker builder?) -->
       <section if="HXCPP_M64">
+        <!-- ORDER IS IMPORTANT for linked libraries. -->
         <lib name="-lbz2" />
         <lib name="-llzma" />
         <lib name="-lm" />
@@ -124,12 +137,16 @@
         <lib name="-lva-x11" />
         <lib name="-lva" />
         <lib name="-lvdpau" />
+        <lib name="-lvpx" />
         <lib name="-lX11" />
         <lib name="-lz" />
+        
+        <lib name="-lssl" />
+        <!-- crypto must link after ssl -->
+        <lib name="-lcrypto" />
 
-        <!-- ORDER IS IMPORTANT! avformat must be included first. -->
+        <!-- avformat must link before avcodec -->
         <lib name="-lavformat" />
-
 
         <lib name="-lavcodec" />
         <lib name="-lavdevice" />

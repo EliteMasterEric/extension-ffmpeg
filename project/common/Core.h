@@ -14,7 +14,6 @@
 #include <cstdlib>
 #include <assert.h>
 #include <math.h>
-#include <malloc.h>
 #include <stdlib.h>
 
 // Library includes
