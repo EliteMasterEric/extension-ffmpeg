@@ -16,9 +16,9 @@ FLAGS="$FLAGS --enable-version3"
 # Add HTTPS support.
 FLAGS="$FLAGS --enable-openssl"
 
-cd ./ffmpeg
-make -f Makefile clean && ./configure $FLAGS && make -f Makefile
-cd ..
+pushd ./ffmpeg
+make clean && ./configure $FLAGS && make
+popd
 
 # Export the necessary binaries.
 OUTPUT_DIR=../lib.build/Mac64/

@@ -18,6 +18,7 @@ FLAGS="$FLAGS --enable-version3"
 
 # Add HTTPS support.
 FLAGS="$FLAGS --enable-openssl"
+FLAGS="$FLAGS --enable-libvpx"
 
 pushd ffmpeg
 make clean && ./configure $FLAGS && make
