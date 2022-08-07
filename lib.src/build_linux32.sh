@@ -1,4 +1,5 @@
 # Compiles FFmpeg for 32-bit Linux
+# https://trac.ffmpeg.org/wiki/CompilationGuide/Ubuntu
 
 # Compilation flags for FFmpeg
 FLAGS=""

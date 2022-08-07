@@ -13,7 +13,8 @@ Contributions are highly welcome! Feel free to open an issue or pull request if 
 ## Building on Windows
 
 To build `extension-ffmpeg` from source, perform these steps to fetch dependencies:
-1. Install Visual Studio 2019, installing the following components:
+1. Do NOT download the repository by clicking the `Download ZIP` button on the Github page. Instead, run `git clone https://github.com/MasterEric/extension-ffmpeg` to create a local Git repository.
+2. Install Visual Studio 2019, installing the following components:
 - `MSVC v142 - VS 2019 C++ x64/x86 build tools`
 - `Windows SDK (10.0.17763.0)`
 2. Install MSYS2.

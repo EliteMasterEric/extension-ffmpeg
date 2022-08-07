@@ -1,4 +1,5 @@
 # Compiles FFmpeg for 64-bit MacOS 
+# https://trac.ffmpeg.org/wiki/CompilationGuide/macOS
 
 # Compilation flags for FFmpeg
 FLAGS=""
@@ -16,7 +17,7 @@ FLAGS="$FLAGS --enable-version3"
 FLAGS="$FLAGS --enable-openssl"
 
 cd ./ffmpeg
-make clean && ./configure $FLAGS && make
+make -f Makefile clean && ./configure $FLAGS && make -f Makefile
 cd ..
 
 # Export the necessary binaries.
