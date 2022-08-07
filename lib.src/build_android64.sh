@@ -8,15 +8,15 @@ NDKDIR="/your/ndk/path/here"
 # If some of the bin locations look weird to you
 # Trust me, it compiles with this
 RANLIB="$NDKDIR/bin/llvm-ranlib"
-CC="$NDKDIR/aarch64-linux-android21-clang"
-CXX="$NDKDIR/aarch64-linux-android21-clang++"
-STRIP="$NDKDIR/llvm-strip"
+CC="$NDKDIR/bin/aarch64-linux-android21-clang"
+CXX="$NDKDIR/bin/aarch64-linux-android21-clang++"
+STRIP="$NDKDIR/bin/llvm-strip"
 NM="$NDKDIR/bin/llvm-nm"
 AS="$NDKDIR/bin/aarch64-linux-android21-clang"
 AR="$NDKDIR/bin/llvm-ar"
 
 # Yep not fancy but it works soo
-FLAGS="--disable-doc --disable-programs --enable-version3 --arch="aarch64" --target-os=android --as="$AS" --cc="$CC" --cxx="$CXX" --strip="$STRIP" --enable-cross-compile  --cross-prefix="$NDKPREFIX" --nm="$NM" --ar="$AR" --ranlib="$RANLIB""
+FLAGS="--disable-doc --disable-programs --enable-version3 --arch="aarch64" --target-os=android --as="$AS" --cc="$CC" --cxx="$CXX" --strip="$STRIP" --enable-cross-compile  --cross-prefix="$NDKDIR" --nm="$NM" --ar="$AR" --ranlib="$RANLIB""
 
 # You can also compile from termux with the ndk with this
 
