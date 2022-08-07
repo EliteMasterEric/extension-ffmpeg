@@ -44,16 +44,16 @@
     <set name="LIBFFMPEG_BUILD" value="../lib.build/Linux64" />
   </section>
 
-  <section if="mac HXCPP_M64">
-    <echo value="Target platform: Mac (x64)" />
-
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Mac64" />
-  </section>
-
   <section if="mac HXCPP_M32">
     <echo value="Target platform: Mac (x32)" />
 
     <set name="LIBFFMPEG_BUILD" value="../lib.build/Mac32" />
+  </section>
+
+  <section if="mac HXCPP_M64">
+    <echo value="Target platform: Mac (x64)" />
+
+    <set name="LIBFFMPEG_BUILD" value="../lib.build/Mac64" />
   </section>
 
   <echo value="==========================" />
@@ -167,7 +167,10 @@
       <flag value="-L${LIBFFMPEG_BUILD}" />
       <flag value="-L/usr/lib" />
 
-      <!-- ORDER IS IMPORTANT! avformat must be included first. -->
+      <!-- ORDER IS IMPORTANT for linked libraries. -->
+      <lib name="-lportaudio" />
+
+      <!-- avformat must link before avcodec -->
       <lib name="-lavformat" />
 
       <lib name="-lavcodec" />

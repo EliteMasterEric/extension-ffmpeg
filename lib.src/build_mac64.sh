@@ -16,6 +16,9 @@ FLAGS="$FLAGS --enable-version3"
 # Add HTTPS support.
 FLAGS="$FLAGS --enable-openssl"
 
+# Make the library target OSX 10.9 to hide warnings.
+MACOSX_DEPLOYMENT_TARGET=10.9
+
 pushd ./ffmpeg
 ./configure $FLAGS && make
 popd
