@@ -1,12 +1,7 @@
-# Compiles FFmpeg for 32-bit Linux
+# Compiles FFmpeg for 64-bit MacOS 
 
 # Compilation flags for FFmpeg
 FLAGS=""
-
-# Cross-compilation flags.
-# To successfully build for Linux, you must have an i686 (x32 bit only) build of the library.
-FLAGS="$FLAGS --cc='cc -m32'"
-FLAGS="$FLAGS --enable-static"
 
 # Disable the features we don't want or use to reduce compile times.
 FLAGS="$FLAGS --disable-doc"
@@ -17,12 +12,15 @@ FLAGS="$FLAGS --logfile=../build.log"
 # Upgrade license to LGPLv3, allowing use of some ApacheV2 licensed dependencies.
 FLAGS="$FLAGS --enable-version3"
 
+# Add HTTPS support.
+FLAGS="$FLAGS --enable-openssl"
+
 pushd ffmpeg
 make clean && ./configure $FLAGS && make
 popd
 
 # Export the necessary binaries.
-OUTPUT_DIR=../lib.build/Linux32
+OUTPUT_DIR=../lib.build/Mac64/
 mkdir -p $OUTPUT_DIR
 cp -f ffmpeg/libavcodec/libavcodec.a $OUTPUT_DIR/libavcodec.a
 cp -f ffmpeg/libavdevice/libavdevice.a $OUTPUT_DIR/libavdevice.a

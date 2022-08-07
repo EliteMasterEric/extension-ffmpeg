@@ -2,7 +2,7 @@
 <project>
 	<meta title="VideoPlayback" package="com.sample.VideoPlayback" version="1.0.0" company="Company Name" />
 
-	<window width="1280" height="720" fps="60" vsync="false" />
+	<window width="1280" height="720" fps="60" vsync="false" background="#FF00FF" hardware="true" />
 
 	<app main="Main" path="bin" file="VideoPlayback" />
 	<source path="src" />

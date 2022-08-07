@@ -314,11 +314,13 @@ class Media {
       if (!videoCodecStarted)
         throw EStreamNotFound;
 
+      videoFrameBuffer.position = 0;
       var inBuffer:BytesData = videoFrameBuffer; // Cast to BytesData.
       var result:Int = CppUtil.loadFunction("hx_ffmpeg_emit_video_frame", 2)(context, inBuffer);
       Error.handleError(result);
-
+      
       // Copy the frame data into the bitmap.
+      videoFrameBuffer.position = 0;
       videoBitmapData.lock();
       videoBitmapData.setPixels(videoBitmapData.rect, videoFrameBuffer);
       videoBitmapData.unlock();
@@ -330,6 +332,16 @@ class Media {
           throw e;
       }
     }
+  }
+
+  
+  public function printPixel(x:Int = 0, y:Int = 0):Void {
+    videoFrameBuffer.position = (4 * (y * videoWidth + x));
+
+    trace(StringTools.hex(videoFrameBuffer.readUnsignedByte(), 2) + ':'
+        + StringTools.hex(videoFrameBuffer.readUnsignedByte(), 2) + ':'
+        + StringTools.hex(videoFrameBuffer.readUnsignedByte(), 2) + ':'
+        + StringTools.hex(videoFrameBuffer.readUnsignedByte(), 2));
   }
 
   /**
@@ -379,11 +391,13 @@ class Media {
       }
     }
     if (bytesRemaining > 0) {
+      // Replace the buffer with one containing only the remaining bytes.
       var leftoverBytes = new ByteArray();
       leftoverBytes.writeBytes(soundOutputBuffer, bytesToWrite, bytesRemaining);
       soundOutputBuffer = leftoverBytes;
-    } else {
-      soundOutputBuffer.length = 0;
+    } {
+      // Replace the buffer with an empty one.
+      soundOutputBuffer = new ByteArray();
     }
   }
 
