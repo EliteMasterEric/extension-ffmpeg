@@ -12,7 +12,8 @@ NDK_CC="$NDKDIR/bin/aarch64-linux-android21-clang"
 NDK_CXX="$NDKDIR/bin/aarch64-linux-android21-clang++"
 NDK_STRIP="$NDKDIR/bin/llvm-strip"
 NDK_NM="$NDKDIR/bin/llvm-nm"
-# No this isnt a mistake lol
+# No this isnt a mistake lol this was done because configure begged for gas assembler and this fixes it 
+# (didnt use llvm-as becsuse it froze configure for some reason)
 NDK_AS="$NDKDIR/bin/aarch64-linux-android21-clang"
 NDK_AR="$NDKDIR/bin/llvm-ar"
 
