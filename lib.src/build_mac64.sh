@@ -16,8 +16,8 @@ FLAGS="$FLAGS --enable-version3"
 # Add HTTPS support.
 FLAGS="$FLAGS --enable-openssl"
 
-pushd ./ffmpeg
-make clean && ./configure $FLAGS && make
+pushd lib.src/ffmpeg
+./configure $FLAGS && make
 popd
 
 # Export the necessary binaries.
