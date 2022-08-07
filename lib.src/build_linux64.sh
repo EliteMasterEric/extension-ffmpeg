@@ -21,7 +21,7 @@ FLAGS="$FLAGS --enable-openssl"
 FLAGS="$FLAGS --enable-libvpx"
 
 pushd ffmpeg
-make clean && ./configure $FLAGS && make
+./configure $FLAGS && make
 popd
 
 # Export the necessary binaries.

@@ -28,7 +28,7 @@ Then, follow these steps:
 
 This will generate the necessary `.a` files that you need to build the extension.
 
-To build the extension itself, run `lime rebuild extension-ffmpeg windows`.
+To build the extension itself, run `lime rebuild extension-ffmpeg windows`. You will need to repeat this step if you change any of the C++ files located in the `project` folder.
 
 # Building on Linux
 
@@ -41,24 +41,28 @@ To build `extension-ffmpeg` from source, follow these steps:
 4. Call `git submodule update --init --recursive --remote` to download the source for FFmpeg.
 5. Navigate to `./lib.src/`.
 6. Run `./build_linux64.sh`.
+- You will need to repeat this step if you modify the compile flags in the script (which are used to build FFmpeg's libs).
 
 This will generate the necessary `.a` files that you need to build the extension.
 
-To build the extension itself, run `lime rebuild extension-ffmpeg linux`.
+To build the extension itself, run `lime rebuild extension-ffmpeg linux`. You will need to repeat this step if you change any of the C++ files located in the `project` folder.
 
 # Building on MacOS
 
 To build `extension-ffmpeg` from source, follow these steps:
 1. Do NOT download the repository by clicking the `Download ZIP` button on the Github page. 
 - Instead, run `git clone https://github.com/MasterEric/extension-ffmpeg` to create a local Git repository.
-2. Navigate to the project folder.
-3. Call `git submodule update --init --recursive --remote` to download the source for FFmpeg.
-4. Navigate to `./lib.src/`.
-5. Run `./build_mac64.sh`.
+2. Use [Brew](https://brew.sh/) to install dependencies:
+- `brew install nasm`
+3. Navigate to the project folder.
+4. Call `git submodule update --init --recursive --remote` to download the source for FFmpeg.
+5. Navigate to `./lib.src/`.
+6. Run `./build_mac64.sh`.
+- You will need to repeat this step if you modify the compile flags in the script (which are used to build FFmpeg's libs).
 
 This will generate the necessary `.a` files that you need to build the extension.
 
-To build the extension itself, run `lime rebuild extension-ffmpeg mac`.
+To build the extension itself, run `lime rebuild extension-ffmpeg mac`. You will need to repeat this step if you change any of the C++ files located in the `project` folder.
 
 ## Building on Other Platforms
 

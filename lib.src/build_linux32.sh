@@ -19,7 +19,7 @@ FLAGS="$FLAGS --logfile=../build.log"
 FLAGS="$FLAGS --enable-version3"
 
 pushd ffmpeg
-make clean && ./configure $FLAGS && make
+./configure $FLAGS && make
 popd
 
 # Export the necessary binaries.

@@ -17,7 +17,7 @@ FLAGS="$FLAGS --enable-version3"
 FLAGS="$FLAGS --enable-openssl"
 
 pushd ./ffmpeg
-make clean && ./configure $FLAGS && make
+./configure $FLAGS && make
 popd
 
 # Export the necessary binaries.

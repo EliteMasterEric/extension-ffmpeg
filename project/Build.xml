@@ -145,6 +145,22 @@
     <section if="mac">
       <!-- TODO: Resolve issues. -->
       <ext value=".ndll" />
+
+      <!-- Prioritize local built libs over system libs. -->
+      <flag value="-L${LIBFFMPEG_BUILD}" />
+      <flag value="-L/usr/lib" />
+
+      <!-- ORDER IS IMPORTANT! avformat must be included first. -->
+      <lib name="-lavformat" />
+
+      <lib name="-lavcodec" />
+      <lib name="-lavdevice" />
+      <lib name="-lavfilter" />
+      <lib name="-lavutil" />
+      <lib name="-lswresample" />
+      <lib name="-lswscale" />
+
+      <files id="core" />
     </section>
 
     <section if="android">
