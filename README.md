@@ -66,10 +66,16 @@ To build the extension itself, run `lime rebuild extension-ffmpeg mac`. You will
 
 ## Building on Other Platforms
 
-Support for other platforms (MacOS, Android, iOS, HTML5 via emscripten) is in development.
+Support for other platforms (Android, iOS, HTML5 via emscripten) is in development.
 
 ## License
 
 The code within the repository of `extension-ffmpeg` is made available under the permissive MIT License.
 
 This software uses code of [FFmpeg](http://ffmpeg.org) licensed under the [LGPLv3.0](https://www.gnu.org/licenses/lgpl-3.0.html) and its sources can be downloaded [here](https://git.ffmpeg.org/ffmpeg).
+
+## Credits
+
+- [MasterEric](https://github.com/MasterEric) - Creator, lead developer and maintainer.
+- [JonnyCat](https://github.com/ItsyourboyJonnycat) - MacOS support.
+- The contributors.

@@ -4,9 +4,11 @@
 /project/all_objs
 /deploy.zip
 /ndll/*/*.a
-/ndll/*/*.ndll
 /ndll/*/*.hash
 /ndll/*
 .DS_Store
 /lib.src/build.log
 /lib.build/
+
+# Include the NDLLs for people who can't build.
+!/ndll/*/*.ndll
