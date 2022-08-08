@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <xml>
 
   <!-- Variables and compile flags. -->
@@ -8,8 +8,8 @@
   <set name="LIBSUFFIX" value="${HX_TARGET_SUFFIX}" if="HX_TARGET_SUFFIX" />
   <set name="LIBSUFFIX" value="${LIBEXTRA}" unless="LIBSUFFIX" />
 
-  <set name="ndll-tool" value="dll" unless="iphone"/>
-  <set name="ndll-tool" value="static" if="iphone"/>
+  <set name="ndll-tool" value="dll" unless="iphone" />
+  <set name="ndll-tool" value="static" if="iphone" />
 
   <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
 
@@ -106,7 +106,12 @@
   </files>
 
   <!-- The target NDLL file. -->
-  <target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
+  <target
+    id="NDLL"
+    output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}"
+    tool="linker"
+    toolid="${STD_MODULE_LINK}"
+  >
     <outdir name="${OUTPUT_DIR}/${BINDIR}" />
 
     <ext value=".so" />
@@ -164,10 +169,14 @@
       <ext value=".ndll" />
 
       <!-- vflag is used to link frameworks. -->
-      <vflag name="-framework" value="CoreAudio"/>
-      <vflag name="-framework" value="AudioToolbox"/>
-      <vflag name="-framework" value="CoreVideo"/>
-      <vflag name="-framework" value="VideoToolbox"/>
+      <vflag name="-framework" value="CoreServices" />
+      <vflag name="-framework" value="CoreFoundation" />
+      <vflag name="-framework" value="CoreMedia" />
+      <vflag name="-framework" value="CoreAudio" />
+      <vflag name="-framework" value="AudioUnit" />
+      <vflag name="-framework" value="AudioToolbox" />
+      <vflag name="-framework" value="CoreVideo" />
+      <vflag name="-framework" value="VideoToolbox" />
 
       <!-- Prioritize local built libs over system libs. -->
       <flag value="-L${LIBFFMPEG_BUILD}" />
@@ -176,9 +185,13 @@
       <flag value="-L/usr/lib" />
 
       <!-- ORDER IS IMPORTANT for linked libraries. -->
-      <lib name="-lbz2" />
-      <lib name="-llzma" />
+      <!-- Put crypto and ssl first? -->
+      <lib name="-lcrypto" />
       <lib name="-lssl" />
+      <lib name="-lbz2" />
+      <lib name="-lc++" />
+      <lib name="-llzma" />
+      <lib name="-lz" />
 
       <!-- avformat must link before avcodec -->
       <lib name="-lavformat" />
