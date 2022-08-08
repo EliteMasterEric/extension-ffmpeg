@@ -171,6 +171,7 @@
 
       <!-- Prioritize local built libs over system libs. -->
       <flag value="-L${LIBFFMPEG_BUILD}" />
+      <flag value="-L/usr/local/opt/openssl/lib" />
       <flag value="-L/usr/local/lib" />
       <flag value="-L/usr/lib" />
 
