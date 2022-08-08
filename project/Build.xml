@@ -176,7 +176,7 @@
 
       <!-- ORDER IS IMPORTANT for linked libraries. -->
       <lib name="-lbz2" />
-      <lib name="-llibressl" />
+      <lib name="-lopenssl" />
       <lib name="-llzma" />
 
       <!-- avformat must link before avcodec -->
