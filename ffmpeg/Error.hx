@@ -70,6 +70,7 @@ class Error {
   public static final FFMPEG_MEDIA_NOT_FOUND = -2; // ENOENT
 
   public static final FFMPEG_TRY_AGAIN = -11; // EAGAIN
+  public static final FFMPEG_TRY_AGAIN2 = -35; // EAGAIN2
 
   public static final AVERROR_PROTOCOL_NOT_FOUND = buildErrorCode(null, 'P', 'R', 'O');
   public static final AVERROR_STREAM_NOT_FOUND = buildErrorCode(null, 'S', 'T', 'R');
@@ -126,7 +127,8 @@ class Error {
         return EMediaNotFound;
       case FFMPEG_TRY_AGAIN:
         return ETryAgain;
-
+      case FFMPEG_TRY_AGAIN2:
+        return ETryAgain;
       case AVERROR_STREAM_NOT_FOUND:
         return EStreamNotFound;
       case AVERROR_END_OF_FILE:
