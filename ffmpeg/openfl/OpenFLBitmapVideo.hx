@@ -9,7 +9,7 @@ import openfl.display.Bitmap;
 /**
  * Renders a video stream onto an OpenFL Bitmap.
  */
-class OpenFLBitmapVideo extends Bitmap implements IMedia {
+class OpenFLBitmapVideo extends Bitmap implements IVideo {
     private var media:Media;
 
     private var sound:OpenFLVideoSound;
@@ -63,7 +63,8 @@ class OpenFLBitmapVideo extends Bitmap implements IMedia {
     function onEnterFrame(event:openfl.events.Event):Void {
         if (playing) {
             media.decodeVideoFrame();
-            bitmapData = media.fetchVideoFrame();
+            media.fetchVideoFrame();
+            bitmapData = media.populateBitmapData();
         } else {
             // Do nothing.
         }

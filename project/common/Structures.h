@@ -1,7 +1,7 @@
 /**
  * @file Structures.h
  * @author MasterEric
- * @brief Defines CFFI functions to instantiate and cleanup structure objects.
+ * @brief Defines CFFI functions to instantiate and cleanup structured objects.
  */
 
 #ifndef EXT_FFMPEG_STRUCTURES
@@ -14,5 +14,8 @@
  * on `value` objects which were previously stored.
  */
 vkind kind_FFmpegContext;
+
+value FFmpegContext_wrap(FFmpegContext *input);
+void FFmpegContext_close(FFmpegContext *context);
 
 #endif // EXT_FFMPEG_STRUCTURES

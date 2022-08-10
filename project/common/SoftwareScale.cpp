@@ -2,10 +2,7 @@
 
 int FFmpegContext_init_swsCtx(FFmpegContext *context)
 {
-    // TODO: Change the destionation width and height to the size provided by the user,
-    // and see if performance/memory usage improves.
-
-    printf("Initializing software scaling context.\n");
+    printf("[extension-ffmpeg] Initializing software scaling context.\n");
     context->swsCtx = sws_getContext(
         // Source
         context->videoCodecCtx->width, context->videoCodecCtx->height, context->videoCodecCtx->pix_fmt,
@@ -28,9 +25,11 @@ int FFmpegContext_sws_scale_video_frame(FFmpegContext *context) {
         return -1;
     }
 
+    AVFrame* videoFrame = FFmpegFrameQueue_pop(context->videoFrameQueue);
+
     int result = sws_scale(context->swsCtx,
-        context->videoFrame->data, context->videoFrame->linesize, 0,
-        context->videoCodecCtx->height, context->videoFrameRGB->data, context->videoFrameRGB->linesize);
+        videoFrame->data, videoFrame->linesize, 0,
+        context->videoCodecCtx->height, context->videoOutputFrame->data, context->videoOutputFrame->linesize);
 
     if (result < 0) {
         printf("[extension-ffmpeg] Failed to scale the video frame.\n");

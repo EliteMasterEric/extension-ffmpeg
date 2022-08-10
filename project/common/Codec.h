@@ -1,7 +1,8 @@
 /**
  * @file Codec.h
  * @author MasterEric
- * @brief Defines CFFI functions for initializing and working with codecs.
+ * @brief Defines CFFI functions for working with avcodec,
+ *        including initializing video and audio codecs.
  */
 
 #ifndef EXT_FFMPEG_CODEC

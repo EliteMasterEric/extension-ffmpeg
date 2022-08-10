@@ -58,23 +58,25 @@ int FFmpegContext_avcodec_init_video_codec(FFmpegContext *context)
 
 int FFmpegContext_allocate_video_frame(FFmpegContext *context)
 {
-    printf("Allocating output frame...\n");
+    printf("[extension-ffmpeg] Allocating output frame...\n");
     // Determine the required buffer size and allocate it.
-    context->videoFrameRGB->format = FFMPEG_PIXEL_FORMAT;
-    context->videoFrameRGB->width = context->videoCodecCtx->width;
-    context->videoFrameRGB->height = context->videoCodecCtx->height;
+    context->videoOutputFrame->format = FFMPEG_PIXEL_FORMAT;
+    context->videoOutputFrame->width = context->videoCodecCtx->width;
+    context->videoOutputFrame->height = context->videoCodecCtx->height;
 
-    context->videoFrameRGBBuffer = (uint8_t*) av_malloc(
-        av_image_get_buffer_size(FFMPEG_PIXEL_FORMAT, context->videoFrameRGB->width, context->videoFrameRGB->height, 32)
-    );
+    // The videoOutputFrameBuffer contains the actual byte data of the image.
+    // The size of the buffer is determined by the width, height and pixel format.
+    context->videoOutputFrameSize = av_image_get_buffer_size(FFMPEG_PIXEL_FORMAT,
+        context->videoOutputFrame->width, context->videoOutputFrame->height, 32);
+    context->videoOutputFrameBuffer = (uint8_t*) av_malloc(context->videoOutputFrameSize);
 
     int result = av_image_fill_arrays(
-        context->videoFrameRGB->data,
-        context->videoFrameRGB->linesize,
-        context->videoFrameRGBBuffer,
+        context->videoOutputFrame->data,
+        context->videoOutputFrame->linesize,
+        context->videoOutputFrameBuffer,
         AV_PIX_FMT_BGRA,
-        context->videoFrameRGB->width,
-        context->videoFrameRGB->height,
+        context->videoOutputFrame->width,
+        context->videoOutputFrame->height,
         32
     );
 
@@ -88,13 +90,7 @@ int FFmpegContext_allocate_video_frame(FFmpegContext *context)
     return 0;
 }
 
-/**
- * @brief Initializes the codec for the stream's video output.
- *
- * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the codec was initialized successfully.
- */
-value __hx_ffmpeg_avcodec_init_video_codec(value context)
+DEFINE_FUNC_1(hx_ffmpeg_avcodec_init_video_codec, context)
 {
     printf("[extension-ffmpeg] Initializing video codec.\n");
     FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
@@ -103,11 +99,12 @@ value __hx_ffmpeg_avcodec_init_video_codec(value context)
     return alloc_int(result);
 }
 
-DEFINE_FUNC_1(hx_ffmpeg_avcodec_init_video_codec, context)
-{
-    return __hx_ffmpeg_avcodec_init_video_codec(context);
-}
-
+/**
+ * @brief Initializes the codec for the stream's audio output.
+ *
+ * @param context The FFmpeg context to populate.
+ * @return 0 if successful, otherwise an error code.
+ */
 int FFmpegContext_avcodec_init_audio_codec(FFmpegContext *context)
 {
     // Initialize the audio codec context.
@@ -156,41 +153,11 @@ int FFmpegContext_avcodec_init_audio_codec(FFmpegContext *context)
     return 0;
 }
 
-/**
- * @brief Initializes the codec for the stream's audio output.
- *
- * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the codec was initialized successfully.
- */
-value __hx_ffmpeg_avcodec_init_audio_codec(value context)
+DEFINE_FUNC_1(hx_ffmpeg_avcodec_init_audio_codec, context)
 {
     printf("[extension-ffmpeg] Initializing audio codec.\n");
     FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
     int result = FFmpegContext_avcodec_init_audio_codec(contextPointer);
 
     return alloc_int(result);
-}
-
-DEFINE_FUNC_1(hx_ffmpeg_avcodec_init_audio_codec, context)
-{
-    return __hx_ffmpeg_avcodec_init_audio_codec(context);
-}
-
-
-/**
- * @brief Returns the height of the current video stream.
- * 
- * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return The height of the video stream in pixels.
- */
-value __hx_ffmpeg_get_video_frame_number(value context) {
-  FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
-  
-  int result = contextPointer->videoCodecCtx->frame_number;
-  return alloc_int(result);
-}
-
-DEFINE_FUNC_1(hx_ffmpeg_get_video_frame_number, context)
-{
-  return __hx_ffmpeg_get_video_frame_number(context);
 }

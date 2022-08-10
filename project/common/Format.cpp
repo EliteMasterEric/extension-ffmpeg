@@ -1,70 +1,34 @@
 #include "Format.h"
 
 /**
- * @brief Opens an input file and stores the format context.
- * 
- * @param context The FFmpegContext to populate.
- * @param filename The name of the file to open.
- * @return Whether the file was opened successfully.
- */
-int FFmpegContext_avformat_open_input(FFmpegContext* context, const char* filename) {
-  context->avFormatCtx = avformat_alloc_context();
-
-  int result = avformat_open_input(&context->avFormatCtx, filename, NULL, NULL);
-
-  return result;
-}
-
-/**
  * @brief Opens an input file, allowing avformat to determine file format information.
  * 
  * @param context A Haxe object wrapping the FFmpegContext to populate.
  * @param filename A Haxe object wrapping the name of the file to open.
- * @return Whether the file was opened successfully.
+ * @return 0 if successful, otherwise an error code.
  */
-value __hx_ffmpeg_avformat_open_input(value context, value filename) {
-  FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
-  const char* filenamePointer = val_get_string(filename);
-  int result = FFmpegContext_avformat_open_input(contextPointer, filenamePointer);
-
-  return alloc_int(result);
-}
-
 DEFINE_FUNC_2(hx_ffmpeg_avformat_open_input, context, filename)
 {
-  return __hx_ffmpeg_avformat_open_input(context, filename);
-}
-
-/**
- * @brief Parses additional information about the stream,
- *        such as the frame rate.
- * 
- * @param context The FFmpegContext to populate.
- * @return Whether the file was parsed successfully.
- */
-int FFmpegContext_avformat_find_stream_info(FFmpegContext* context) {
-  int result = avformat_find_stream_info(context->avFormatCtx, NULL);
-
-  return result;
-}
-
-/**
- * @brief Parses additional information about the stream,
- *        such as the frame rate.
- * 
- * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the file was parsed successfully.
- */
-value __hx_ffmpeg_avformat_find_stream_info(value context) {
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
-  int result = FFmpegContext_avformat_find_stream_info(contextPointer);
+  const char* filenamePointer = val_get_string(filename);
+  int result = avformat_open_input(&contextPointer->avFormatCtx, filenamePointer, NULL, NULL);
 
   return alloc_int(result);
 }
 
+/**
+ * @brief Parses additional information about the media,
+ *        such as the frame rate and the available streams.
+ * 
+ * @param context A Haxe object wrapping the FFmpegContext to populate.
+ * @return 0 if successful, otherwise an error code.
+ */
 DEFINE_FUNC_1(hx_ffmpeg_avformat_find_stream_info, context)
 {
-  return __hx_ffmpeg_avformat_find_stream_info(context);
+  FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
+  int result = avformat_find_stream_info(contextPointer->avFormatCtx, NULL);
+
+  return alloc_int(result);
 }
 
 /**
@@ -130,88 +94,76 @@ int FFmpegContext_av_find_subtitle_stream(FFmpegContext* context) {
 }
 
 /**
- * @brief Parses additional information about the stream,
- *        such as the frame rate.
+ * @brief Dumps additional information about the stream to the console.
  * 
- * @param context The FFmpegContext to populate.
- * @return Whether the file was parsed successfully.
+ * @param context The FFmpegContext to dump info for.
  */
 void FFmpegContext_av_dump_format(FFmpegContext* context) {
   av_dump_format(context->avFormatCtx, 0, "debug.log", 0);
+
+  // Let's dump some other stuff too.
+  printf("========================================================\n");
+  printf("[extension-ffmpeg] Additional information:\n");
+  printf("Average frame rate: %f\n", av_q2d(context->videoStream->avg_frame_rate));
+  printf("Timebase: %d/%d\n", context->videoStream->time_base.num, context->videoStream->time_base.den);
+  printf("Real framerate: %f\n", av_q2d(context->videoStream->r_frame_rate));
+  printf("========================================================\n");
 }
 
 /**
- * @brief Parses additional information about the stream,
- *        such as the frame rate.
+ * @brief Dumps additional information about the stream to the console.
  * 
- * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the file was parsed successfully.
+ * @param context A Haxe object wrapping the FFmpegContext to dump info for.
  */
-value __hx_ffmpeg_av_dump_format(value context) {
+DEFINE_FUNC_1(hx_ffmpeg_av_dump_format, context)
+{
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   FFmpegContext_av_dump_format(contextPointer);
 
   return alloc_null();
 }
 
-DEFINE_FUNC_1(hx_ffmpeg_av_dump_format, context)
-{
-  return __hx_ffmpeg_av_dump_format(context);
-}
-
 /**
  * @brief Locates and caches the best video stream in the file.
  * 
  * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the file was parsed successfully.
+ * @return 0 if successful, otherwise an error code.
  */
-value __hx_ffmpeg_av_find_best_video_stream(value context) {
+DEFINE_FUNC_1(hx_ffmpeg_av_find_best_video_stream, context)
+{
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   int result = FFmpegContext_av_find_video_stream(contextPointer);
 
   return alloc_int(result);
 }
 
-DEFINE_FUNC_1(hx_ffmpeg_av_find_best_video_stream, context)
-{
-  return __hx_ffmpeg_av_find_best_video_stream(context);
-}
-
 /**
  * @brief Locates and caches the best audio stream in the file.
  * 
  * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the file was parsed successfully.
+ * @return 0 if successful, otherwise an error code.
  */
-value __hx_ffmpeg_av_find_best_audio_stream(value context) {
+DEFINE_FUNC_1(hx_ffmpeg_av_find_best_audio_stream, context)
+{
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   int result = FFmpegContext_av_find_audio_stream(contextPointer);
 
   return alloc_int(result);
 }
 
-DEFINE_FUNC_1(hx_ffmpeg_av_find_best_audio_stream, context)
-{
-  return __hx_ffmpeg_av_find_best_audio_stream(context);
-}
-
 /**
  * @brief Locates and caches the best subtitle stream in the file.
  * 
  * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the file was parsed successfully.
+ * @return 0 if successful, otherwise an error code.
  */
-value __hx_ffmpeg_av_find_best_subtitle_stream(value context) {
+DEFINE_FUNC_1(hx_ffmpeg_av_find_best_subtitle_stream, context)
+{
   printf("[extension-ffmpeg] av_find_best_subtitle_stream\n");
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   int result = FFmpegContext_av_find_subtitle_stream(contextPointer);
 
   return alloc_int(result);
-}
-
-DEFINE_FUNC_1(hx_ffmpeg_av_find_best_subtitle_stream, context)
-{
-  return __hx_ffmpeg_av_find_best_subtitle_stream(context);
 }
 
 /**
@@ -220,16 +172,12 @@ DEFINE_FUNC_1(hx_ffmpeg_av_find_best_subtitle_stream, context)
  * @param context A Haxe object wrapping the FFmpegContext to populate.
  * @return The width of the video stream in pixels.
  */
-value __hx_ffmpeg_get_video_width(value context) {
+DEFINE_FUNC_1(hx_ffmpeg_get_video_width, context)
+{
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   
   int result = contextPointer->videoCodecCtx->width;
   return alloc_int(result);
-}
-
-DEFINE_FUNC_1(hx_ffmpeg_get_video_width, context)
-{
-  return __hx_ffmpeg_get_video_width(context);
 }
 
 /**
@@ -238,14 +186,10 @@ DEFINE_FUNC_1(hx_ffmpeg_get_video_width, context)
  * @param context A Haxe object wrapping the FFmpegContext to populate.
  * @return The height of the video stream in pixels.
  */
-value __hx_ffmpeg_get_video_height(value context) {
+DEFINE_FUNC_1(hx_ffmpeg_get_video_height, context)
+{
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   
   int result = contextPointer->videoCodecCtx->height;
   return alloc_int(result);
-}
-
-DEFINE_FUNC_1(hx_ffmpeg_get_video_height, context)
-{
-  return __hx_ffmpeg_get_video_height(context);
 }

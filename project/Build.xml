@@ -101,12 +101,16 @@
     <file name="common/Error.cpp" />
     <depend name="common/Format.h" />
     <file name="common/Format.cpp" />
+    <depend name="common/HaxeCFFI.h" />
+    <file name="common/HaxeCFFI.cpp" />
     <depend name="common/SoftwareResample.h" />
     <file name="common/SoftwareResample.cpp" />
     <depend name="common/SoftwareScale.h" />
     <file name="common/SoftwareScale.cpp" />
     <depend name="common/Structures.h" />
     <file name="common/Structures.cpp" />
+    <depend name="common/Syncronization.h"  />
+    <file name="common/Syncronization.cpp" />
     <depend name="common/Version.h" />
     <file name="common/Version.cpp" />
   </files>

@@ -1,7 +1,8 @@
 /**
  * @file Format.h
  * @author MasterEric
- * @brief Defines CFFI functions for working with swscale.
+ * @brief Defines CFFI functions for working with swscale,
+ *        including rescaling video frames for playback.
  */
 
 #ifndef EXT_FFMPEG_SOFTWARESCALE

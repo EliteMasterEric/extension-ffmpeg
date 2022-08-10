@@ -2,8 +2,8 @@
 
 // Emitting video frames is manual, while emitting audio frames is automatic.
 
-int FFmpeg_emit_video_frame(FFmpegContext *context, char* buffer_ptr, int buffer_size) {
-    // context->videoFrame contains the latest video frame.
+int FFmpeg_emit_video_frame(FFmpegContext *context, value emitVideoCallback) {
+    // context->videoFrameQueue contains the next few video frames.
 
     // Convert the video frame from YUV (or whatever it is) to an RGB frame.
     int result = FFmpegContext_sws_scale_video_frame(context);
@@ -15,8 +15,13 @@ int FFmpeg_emit_video_frame(FFmpegContext *context, char* buffer_ptr, int buffer
     }
 
     // Write the newly converted video frame to the output buffer.
-    int data_length = av_image_get_buffer_size(FFMPEG_PIXEL_FORMAT, context->videoFrameRGB->width, context->videoFrameRGB->height, 32);
-    result = copyVideoFrame(context->videoFrameRGB, buffer_ptr, buffer_size);
+    int data_length = av_image_get_buffer_size(FFMPEG_PIXEL_FORMAT, context->videoOutputFrame->width, context->videoOutputFrame->height, 32);
+    
+    buffer out_buffer = cffi_build_buffer(context->videoOutputFrameBuffer, context->videoOutputFrameSize);    
+
+    // Call the emitVideoCallback function.
+    val_call1(emitVideoCallback, buffer_val(out_buffer));
+
     if (result < 0) {
         // Failed to copy the video frame.
         printf("[extension-ffmpeg] Failed to copy video frame.\n");
@@ -26,44 +31,60 @@ int FFmpeg_emit_video_frame(FFmpegContext *context, char* buffer_ptr, int buffer
     return 0;
 }
 
-int copyVideoFrame(AVFrame* videoFrame, char* buffer_ptr, int buffer_size) {
-    // Perform a raw memory copy to move the frame into the pointer.
-    char *current_buffer_ptr = buffer_ptr;
-	for (int y = 0; y < videoFrame->height; y++)
-	{
-		int copyCount = videoFrame->width * 4; // 4 bytes per pixel
-        if (current_buffer_ptr - buffer_ptr + copyCount > buffer_size)
+/**
+ * @brief Continuously emits frames from the video stream.
+ *        Designed to be run in a separate thread.
+ */
+void FFmpeg_video_thread(FFmpegContext *context, value emitVideoCallback)
+{
+    printf("[extension-ffmpeg] Video thread started.\n");
+    while (!context->quit)
+    {
+        int result = FFmpeg_emit_video_frame(context, emitVideoCallback);
+        if (result < 0)
         {
-            // The buffer is too small to hold the frame.
-            printf("[extension-ffmpeg] Buffer is too small to hold the video frame.\n");
-            return -1;
+            // Failed to decode the frame.
+            printf("[extension-ffmpeg] Failed to decode video frame: %d\n", result);
+            break;
         }
-		memcpy(current_buffer_ptr, videoFrame->data[0]+ y * videoFrame->linesize[0], copyCount);
-		current_buffer_ptr += copyCount;
-	}
-    return 0;
+    }
+    printf("[extension-ffmpeg] Decode thread finished.\n");
 }
 
 /**
- * @brief Decodes one frame from the video stream.
- *
- * @param context A Haxe object wrapping the FFmpegContext to populate.
- * @return Whether the frame was decoded successfully.
+ * @brief Starts a thread to emit frames from the video stream.
  */
-value __hx_ffmpeg_emit_video_frame(value context, value buffer_value)
+DEFINE_FUNC_2(hx_ffmpeg_start_video_thread, context, emitVideoCallback)
 {
-    FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
+    FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
+    contextPointer->videoThread = new std::thread(FFmpeg_video_thread, contextPointer, emitVideoCallback);
 
-	buffer data_buffer = val_to_buffer(buffer_value);
-	char *data_buffer_ptr = buffer_data(data_buffer);
-	int data_buffer_len = buffer_size(data_buffer);
-
-    int result = FFmpeg_emit_video_frame(contextPointer, data_buffer_ptr, data_buffer_len);
-
-    return alloc_int(result);
+    return alloc_int(0);
 }
 
-DEFINE_FUNC_2(hx_ffmpeg_emit_video_frame, context, buffer_value)
+/**
+ * @brief Stops the video thread.
+ */
+DEFINE_FUNC_1(hx_ffmpeg_stop_video_thread, context)
 {
-    return __hx_ffmpeg_emit_video_frame(context, buffer_value);
+    FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
+    contextPointer->quit = true;
+    contextPointer->videoThread->join();
+    delete contextPointer->videoThread;
+    
+    return alloc_int(0);
+}
+
+/**
+ * @brief Returns the current frame number of the video stream.
+ * 
+ * @param context A Haxe object wrapping the FFmpegContext to populate.
+ * @return The current frame number of the video stream.
+ */
+DEFINE_FUNC_1(hx_ffmpeg_get_video_frame_number, context)
+{
+  FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
+  
+  int result = contextPointer->videoCodecCtx->frame_number;
+  return alloc_int(result);
 }

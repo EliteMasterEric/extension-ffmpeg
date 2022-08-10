@@ -2,6 +2,7 @@
 
 /**
  * @brief Initialize structures, typedefs, and kinds.
+ *        Called when the library is loaded.
  */
 void initialize_Structures()
 {
@@ -10,6 +11,8 @@ void initialize_Structures()
 
 /**
  * @brief Determine whether the provided `value` is a `FFmpegContext`.
+ * 
+ * @param value The `value` to check.
  */
 bool is_FFmpegContext(value input)
 {
@@ -17,42 +20,8 @@ bool is_FFmpegContext(value input)
 }
 
 /**
- * @brief Unwraps a Haxe object into an FFmpegContext object.
- */
-FFmpegContext *FFmpegContext_unwrap(value input)
-{
-  if (!is_FFmpegContext(input))
-    hx_throw_exception("Not an FFmpegContext.");
-  return (FFmpegContext *)val_get_handle(input, kind_FFmpegContext);
-}
-
-/**
- * @brief Process an FFmpegContext for garbage collection.
- * This destroys an object that is no longer needed.
- */
-static void FFmpegContext_destroy(value input)
-{
-  FFmpegContext *contextPointer = FFmpegContext_unwrap(input);
-}
-
-/**
- * @brief Wraps an FFmpegContext object in a Haxe object.
- * @return A Haxe object representing the FFmpegContext.
- */
-value FFmpegContext_wrap(FFmpegContext *input)
-{
-  // Wrap the FFmpegContext object in a Haxe Dynamic so it can be held onto.
-  value result = alloc_abstract(kind_FFmpegContext, input);
-
-  // Ensure the object is garbage collected when the Haxe object is destroyed.
-  val_gc(result, FFmpegContext_destroy);
-
-  return result;
-}
-
-/**
- * @brief Create a new FFmpegContext object. This stores all the information
- * about a video or audio stream.
+ * @brief Create a new FFmpegContext object.
+ *        This stores all the information about a video or audio stream.
  *
  * @return A pointer to a new FFmpegContext struct.
  */
@@ -77,54 +46,89 @@ FFmpegContext *FFmpegContext_create()
   contextPointer->subtitleCodec = nullptr;
   contextPointer->subtitleCodecCtx = nullptr;
 
-  contextPointer->videoFrame = av_frame_alloc();
-  contextPointer->videoFrameRGB = av_frame_alloc();
-  contextPointer->videoFrameRGBBuffer = nullptr;
+  contextPointer->videoOutputFrame = av_frame_alloc();
+  contextPointer->videoOutputFrameBuffer = nullptr;
+
+  FFmpegFrameQueue_create(contextPointer->videoFrameQueue, FFMPEG_VIDEO_QUEUE_SIZE);
+  FFmpegFrameQueue_create(contextPointer->audioFrameQueue, FFMPEG_AUDIO_QUEUE_SIZE);
  
-  contextPointer->audioFrame = av_frame_alloc();
   contextPointer->audioOutputBuffer = NULL;
   contextPointer->audioOutputChannelLayout = AV_CHANNEL_LAYOUT_STEREO;
-  contextPointer->emitAudioCallback = NULL;
 
   contextPointer->swsCtx = nullptr;
   contextPointer->swrCtx = nullptr;
 
+  contextPointer->decodeThread = NULL;
+  contextPointer->audioThread = NULL;
+  contextPointer->videoThread = NULL;
+
+  contextPointer->quit = false;
+
   return contextPointer;
 }
-const value __hx_ffmpeg_init_ffmpegcontext()
+
+DEFINE_FUNC_0(hx_ffmpeg_init_ffmpegcontext)
 {
   return FFmpegContext_wrap(FFmpegContext_create());
 }
-DEFINE_FUNC_0(hx_ffmpeg_init_ffmpegcontext)
+
+/**
+ * @brief Unwraps a Haxe object into an FFmpegContext object.
+ * 
+ * @param input The Haxe object to unwrap.
+ * @return The FFmpegContext object.
+ */
+FFmpegContext *FFmpegContext_unwrap(value input)
 {
-  return __hx_ffmpeg_init_ffmpegcontext();
+  if (!is_FFmpegContext(input))
+    hx_throw_exception("Not an FFmpegContext.");
+  return (FFmpegContext *)val_get_handle(input, kind_FFmpegContext);
+}
+
+void hx_ffmpegcontext_close(value context) {
+  FFmpegContext_close(FFmpegContext_unwrap(context));
 }
 
 /**
- * @brief Cleans up an FFmpegContext object. Closes the file and codec,
- * and frees the memory.
+ * @brief Wraps an FFmpegContext object in a Haxe object.
+ * 
+ * @param context The FFmpegContext object to wrap.
+ * @return A Haxe object containing a pointer to the FFmpegContext.
+ */
+value FFmpegContext_wrap(FFmpegContext *input)
+{
+  // Wrap the FFmpegContext object in a Haxe Dynamic so it can be held onto.
+  value result = alloc_abstract(kind_FFmpegContext, input);
+
+  // Ensure the object is garbage collected when the Haxe object is destroyed.
+  val_gc(result, hx_ffmpegcontext_close);
+
+  return result;
+}
+
+/**
+ * @brief Cleans up an FFmpegContext object.
+ *        Closes the file and codec, and frees the memory.
+ *        Also signals any threads to close.
  */
 void FFmpegContext_close(FFmpegContext *context)
 {
   // Free the frames.
-  av_free(context->videoFrameRGBBuffer);
-  av_free(context->videoFrameRGB);
-  av_free(context->videoFrame);
-  av_free(context->audioFrame);
+  av_free(context->videoOutputFrameBuffer);
+  av_free(context->videoOutputFrame);
 
   // Close the video codec.
   avcodec_close(context->videoCodecCtx);
 
   // Close the file.
   avformat_close_input(&context->avFormatCtx);
+
+  context->quit = true;
 }
-const value __hx_ffmpeg_close_ffmpegcontext(value context)
+
+DEFINE_FUNC_1(hx_ffmpeg_close_ffmpegcontext, context)
 {
   FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
   FFmpegContext_close(contextPointer);
   return alloc_null();
-}
-DEFINE_FUNC_1(hx_ffmpeg_close_ffmpegcontext, context)
-{
-  return __hx_ffmpeg_close_ffmpegcontext(context);
 }

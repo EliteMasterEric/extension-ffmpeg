@@ -4,7 +4,8 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}/**",
-                "C:\\HaxeToolkit\\haxe\\lib\\hxcpp\\4,2,1\\include"
+                "C:\\HaxeToolkit\\haxe\\lib\\hxcpp\\4,2,1\\include",
+                "/home/eric/haxelib/hxcpp/4,2,1/include"
             ],
             "defines": [
                 "_DEBUG",

@@ -1,18 +1,11 @@
 # Documentation and resources
-- How to write a video player: http://dranger.com/ffmpeg/
-- Compilation on RT: https://trac.ffmpeg.org/wiki/CompilationGuide/WinRT#PrerequisitesandFirstTimeSetupInstructions
-- MS on Visual Studio command prompt: https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line?view=msvc-170
-- List of options: https://stackoverflow.com/questions/24849129/compile-ffmpeg-without-most-codecs
-- https://stackoverflow.com/questions/8403229/ffmpeg-api-compiling-with-specific-formats
-- https://stackoverflow.com/questions/50622515/what-encoders-decoders-muxers-demuxers-parsers-do-i-need-to-enable-in-ffmpeg-for
-- http://howto-pages.org/ffmpeg/#build
-- https://stackoverflow.com/questions/40061101/how-to-access-windows-enviroment-variables-on-msys
-- https://riptutorial.com/ffmpeg/example/30960/find-a-stream
-- https://sodocumentation.net/ffmpeg/topic/10090/decoding
+These are useful links I used when building this library.
 
-## CFFI Libraries
-- https://github.com/MattTuttle/Audaxe/blob/fa327e4ac959f5bd528bff626ccb005f395ad2f3/project/common/ExternalInterface.cpp
-- https://github.com/soywiz-archive/haxe-openfl-ffmpeg/blob/42ec9f648a7810b1f0eb263a45d560d457ad4404/libs.src/build_ffmpeg.sh
+## FFmpeg
+- How to write a video player in less than 1000 lines: http://dranger.com/ffmpeg/
+- FFmpeg libav tutorial: https://github.com/leandromoreira/ffmpeg-libav-tutorial
+- FFmpeg configure options: https://stackoverflow.com/questions/24849129/compile-ffmpeg-without-most-codecs
+- FFmpeg modern frame decoding: https://sodocumentation.net/ffmpeg/topic/10090/decoding
 
 /**
  * Additional notes on Haxe CFFI
@@ -23,7 +16,6 @@
  */
 
 ## Bytes
-
 - `openfl.utils.ByteArray` is an abstract, it provides simple read/write utilities and conversion functions to `openfl.utils.ByteArrayData`.
     - To `ByteArrayData`: No conversion needed.
     - To `Bytes`: Available as implicit cast.
@@ -37,4 +29,14 @@
 
 ## Resolving common errors:
 - Symbol defined multiple times - Make sure #define is called only once, check if something is undefined before defining it.
-- LNK2019: unresolved external symbol - Make sure the `.c` file that includes the file is included in the `Build.xml` file.
+- LNK2019: unresolved external symbol - Make sure the library that implements the function is included in the `Build.xml` file.
+
+## FFMPEG Basics
+The AVFormatContext is the abstraction for the format of the media file, aka container (ex: MKV, MP4, Webm, TS). The AVStream represents each type of data for a given format (ex: audio, video, subtitle, metadata). The AVPacket is a slice of compressed data obtained from the AVStream that can be decoded by an AVCodec (ex: av1, h264, vp9, hevc) generating a raw data called AVFrame.
+
+### PTS
+For a fps=60/1 and timebase=1/60000 each PTS will increase timescale / fps = 1000 therefore the PTS real time for each frame could be (supposing it started at 0):
+
+frame=0, PTS = 0, PTS_TIME = 0
+frame=1, PTS = 1000, PTS_TIME = PTS * timebase = 0.016
+frame=2, PTS = 2000, PTS_TIME = PTS * timebase = 0.033

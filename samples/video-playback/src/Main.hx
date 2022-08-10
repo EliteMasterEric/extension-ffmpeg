@@ -48,10 +48,11 @@ class Main extends Sprite {
     // var filePath:String = "file:assets/earth.mp4";
     // var filePath:String = "file:assets/Limes.webm";
     // var filePath:String = "file:assets/Limes.webm.srt";
-    // var filePath:String = "file:assets/stressCutscene.mp4";
+    var filePath:String = "file:assets/stressCutscene.mp4";
     // var filePath:String = "http://ftp.itec.aau.at/datasets/DASHDataset2014/ElephantsDream/10sec/ElephantsDream_10s_onDemand_2014_05_09.mpd"
-    var filePath:String = "file:assets/nikki.gif";
+    // var filePath:String = "file:assets/nikki.gif";
     // var filePath:String = "file:assets/dancer1.webm";
+    // var filePath:String = "file:assets/travolta.webm";
     // var filePath:String = "https://uploads.ungrounded.net/alternate/1528000/1528775_alternate_113347_r88.zip/assets/music/stressCutscene.mp4";
 
     video = new OpenFLBitmapVideo();

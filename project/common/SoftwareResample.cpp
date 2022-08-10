@@ -32,8 +32,10 @@ int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context) {
         return -1;
     }
 
+    AVFrame *audioFrame = FFmpegFrameQueue_pop(context->audioFrameQueue);
+
     int in_rate = context->audioCodecCtx->sample_rate;
-    int in_samples = context->audioFrame->nb_samples;
+    int in_samples = audioFrame->nb_samples;
     int out_samples = av_rescale_rnd(swr_get_delay(context->swrCtx, in_rate) + in_samples, FFMPEG_BITRATE, in_rate, AV_ROUND_UP);
     AVChannelLayout out_ch_layout = FFMPEG_CHANNEL_LAYOUT;
     int out_channels = out_ch_layout.nb_channels;
@@ -42,7 +44,7 @@ int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context) {
     printf("Allocating output buffer of size %d...\n", out_buffer_size);
     context->audioOutputBuffer = alloc_buffer_len(out_buffer_size);
 
-    const uint8_t** in_buffer = (const uint8_t**) context->audioFrame->data;
+    const uint8_t** in_buffer = (const uint8_t**) audioFrame->data;
     uint8_t* out_buffer = (uint8_t *)buffer_data(context->audioOutputBuffer);
 
     // Takes a number of SAMPLES as an argument, not a number of bytes.

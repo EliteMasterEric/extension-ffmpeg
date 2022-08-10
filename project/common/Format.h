@@ -1,7 +1,8 @@
 /**
  * @file Format.h
  * @author MasterEric
- * @brief Defines CFFI functions for working with libavformat.
+ * @brief Defines CFFI functions for working with libavformat,
+ *        including opening media files and locating streams.
  */
 
 #ifndef EXT_FFMPEG_FORMAT

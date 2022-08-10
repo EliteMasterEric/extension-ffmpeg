@@ -1,7 +1,8 @@
 /**
  * @file DecodeVideo.h
  * @author MasterEric
- * @brief Defines CFFI functions for outputting video frames from a stream.
+ * @brief Defines CFFI functions for outputting video frames from a stream,
+ *        and managing threads for emitting video.
  */
 
 #ifndef EXT_FFMPEG_DECODEVIDEO
