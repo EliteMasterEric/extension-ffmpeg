@@ -8,7 +8,5 @@
 #define EXT_FFMPEG_HAXECFFI
 
 #include "Core.h"
-// An INTERNAL hxcpp header.
-#include <hxcpp.h>
 
 #endif // EXT_FFMPEG_HAXECFFI

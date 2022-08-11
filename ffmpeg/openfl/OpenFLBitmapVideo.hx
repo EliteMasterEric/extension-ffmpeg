@@ -10,63 +10,76 @@ import openfl.display.Bitmap;
  * Renders a video stream onto an OpenFL Bitmap.
  */
 class OpenFLBitmapVideo extends Bitmap implements IVideo {
-    private var media:Media;
+  private var media:Media;
 
-    private var sound:OpenFLVideoSound;
+  private var sound:OpenFLVideoSound;
 
-    public var playing(default, null):Bool = false;
+  public var playing(default, null):Bool = true;
 
-    public function new() {
-        super();
+  public function new() {
+    super();
 
-        media = new Media();
-        sound = new OpenFLVideoSound();
-        sound.media = media;
-        
-        addEventListener(Event.ENTER_FRAME, onEnterFrame);
-    }
+    media = new Media();
+    sound = new OpenFLVideoSound();
+    sound.media = media;
 
-    public function play() {
-        playing = true;
+    addEventListener(Event.ENTER_FRAME, onEnterFrame);
+  }
+
+  public function play() {
+    playing = true;
+    if (!sound.playing) {
         sound.play();
     }
+  }
 
-    public function open(url:String):Void {
-        media.openInput(url);
+  public function open(url:String):Void {
+    trace('Opening...');
+    media.openInput(url, true, true);
 
-        initCodec();
+    initCodec();
+
+    sound.play();
+  }
+
+  public function attachMedia(media:Media):Void {
+    this.media = media;
+  }
+
+  function initCodec():Void {
+    trace('Initializing codec...');
+    // DEBUG: Print video codec info
+    media.dumpFormat();
+
+    if (!media.hasVideo) {
+      // throw "No video stream found in input.";
+    } else {
+      media.initVideoCodec();
+
+      // DEBUG: Print video info
+      trace('Init video codec success.');
+      trace('videoWidth: ' + media.videoWidth);
+      trace('videoHeight: ' + media.videoHeight);
     }
 
-    public function attachMedia(media:Media):Void {
-        this.media = media;
+    if (!media.hasAudio) {} else {
+      media.initAudioCodec();
+      trace('Init audio codec success.');
     }
 
-    function initCodec():Void {
-        // DEBUG: Print video codec info
-        media.dumpFormat();
+    trace('Starting playback threads...');
+    media.startPlaybackThreads();
+    trace('Playback threads started.');
+  }
 
-        if (!media.hasVideo) {
-            throw "No video stream found in input.";
-        }
-
-        media.initVideoCodec();
-
-        // DEBUG: Print video info
-        trace('Init video codec success.');
-        trace('videoWidth: ' + media.videoWidth);
-        trace('videoHeight: ' + media.videoHeight);
-
-        media.initAudioCodec();
-        trace('Init audio codec success.');
+  function onEnterFrame(event:openfl.events.Event):Void {
+    if (playing) {
+      bitmapData = media.populateBitmapData();
+      if (!sound.playing) {
+        sound.play();
+      }
+    } else {
+      // Do nothing.
     }
-
-    function onEnterFrame(event:openfl.events.Event):Void {
-        if (playing) {
-            media.decodeVideoFrame();
-            media.fetchVideoFrame();
-            bitmapData = media.populateBitmapData();
-        } else {
-            // Do nothing.
-        }
-    }
+  }
 }

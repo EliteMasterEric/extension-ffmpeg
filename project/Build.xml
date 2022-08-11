@@ -87,6 +87,9 @@
       The CFFI interface source.
       Split into multiple files for organizational purposes.
     -->
+    <depend name="common/HaxeCFFI.h" />
+    <file name="common/HaxeCFFI.cpp" />
+
     <depend name="common/Codec.h" />
     <file name="common/Codec.cpp" />
     <depend name="common/Core.h" />
@@ -101,8 +104,6 @@
     <file name="common/Error.cpp" />
     <depend name="common/Format.h" />
     <file name="common/Format.cpp" />
-    <depend name="common/HaxeCFFI.h" />
-    <file name="common/HaxeCFFI.cpp" />
     <depend name="common/SoftwareResample.h" />
     <file name="common/SoftwareResample.cpp" />
     <depend name="common/SoftwareScale.h" />

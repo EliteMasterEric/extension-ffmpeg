@@ -13,13 +13,13 @@ int FFmpegContext_init_swrCtx(FFmpegContext *context)
     		0, NULL);
 
     if (result < 0) {
-        printf("[extension-ffmpeg] Failed to allocate software resampler context.\n");
+        // printf("[extension-ffmpeg] Failed to allocate software resampler context.\n");
         return result;
     }
 
 	result = swr_init(context->swrCtx);
     if (result < 0) {
-        printf("[extension-ffmpeg] Failed to initialize the software resampler context.\n");
+        // printf("[extension-ffmpeg] Failed to initialize the software resampler context.\n");
         return result;
     }
 
@@ -28,7 +28,7 @@ int FFmpegContext_init_swrCtx(FFmpegContext *context)
 
 int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context) {
     if (context->swrCtx == nullptr) {
-        printf("[extension-ffmpeg] Software resampler not initialized.\n");
+        // printf("[extension-ffmpeg] Software resampler not initialized.\n");
         return -1;
     }
 
@@ -40,21 +40,21 @@ int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context) {
     AVChannelLayout out_ch_layout = FFMPEG_CHANNEL_LAYOUT;
     int out_channels = out_ch_layout.nb_channels;
 
-    int out_buffer_size = av_samples_get_buffer_size(NULL, out_channels, out_samples, AV_SAMPLE_FMT_FLT, 1);
-    printf("Allocating output buffer of size %d...\n", out_buffer_size);
-    context->audioOutputBuffer = alloc_buffer_len(out_buffer_size);
+    context->audioOutputFrameSize = av_samples_get_buffer_size(NULL, out_channels, out_samples, AV_SAMPLE_FMT_FLT, 1);
+    // printf("Allocating output buffer of size %d...\n", context->audioOutputFrameSize);
+
+    context->audioOutputFrameBuffer = (uint8_t*) av_malloc(context->audioOutputFrameSize);
 
     const uint8_t** in_buffer = (const uint8_t**) audioFrame->data;
-    uint8_t* out_buffer = (uint8_t *)buffer_data(context->audioOutputBuffer);
 
     // Takes a number of SAMPLES as an argument, not a number of bytes.
-    int result = swr_convert(context->swrCtx, &out_buffer, out_samples, in_buffer, in_samples);
+    int result = swr_convert(context->swrCtx, &context->audioOutputFrameBuffer, out_samples, in_buffer, in_samples);
 
     if (result < 0) {
-        printf("[extension-ffmpeg] Failed to resample the audio frame.\n");
+        // printf("[extension-ffmpeg] Failed to resample the audio frame.\n");
         return result;
     }
 
-    // The contents will now be in the audioOutputBuffer.
+    // The contents will now be in the audioOutputFrameBuffer.
     return 0;
 }

@@ -10,4 +10,14 @@
 
 	<haxelib name="openfl" />
 	<haxelib name="extension-ffmpeg" />
+
+	<!-- Debugging definitions -->
+	<section if="debug">
+		<haxedef name="HXCPP_DEBUG_LINK" />
+		<haxedef name="HXCPP_STACK_TRACE" />
+		<haxedef name="HXCPP_STACK_LINE" />
+		<haxedef name="HXCPP_CHECK_POINTER" />
+
+		<haxelib name="hxcpp-debug-server" />
+	</section>
 </project>

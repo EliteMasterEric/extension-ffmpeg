@@ -11,7 +11,7 @@ void initialize_Structures()
 
 /**
  * @brief Determine whether the provided `value` is a `FFmpegContext`.
- * 
+ *
  * @param value The `value` to check.
  */
 bool is_FFmpegContext(value input)
@@ -27,9 +27,12 @@ bool is_FFmpegContext(value input)
  */
 FFmpegContext *FFmpegContext_create()
 {
+  // printf("Allocating FFmpegContext...\n");
   FFmpegContext *contextPointer = (FFmpegContext *)malloc(sizeof(FFmpegContext));
 
-  // We must ensure all values are initialized to prevent comparision errors.
+  // We must ensure all values are initialized and allocated to prevent runtime errors.
+
+  contextPointer->avFormatCtx = avformat_alloc_context();
 
   contextPointer->videoStreamIndex = -1;
   contextPointer->videoStream = nullptr;
@@ -49,10 +52,13 @@ FFmpegContext *FFmpegContext_create()
   contextPointer->videoOutputFrame = av_frame_alloc();
   contextPointer->videoOutputFrameBuffer = nullptr;
 
-  FFmpegFrameQueue_create(contextPointer->videoFrameQueue, FFMPEG_VIDEO_QUEUE_SIZE);
-  FFmpegFrameQueue_create(contextPointer->audioFrameQueue, FFMPEG_AUDIO_QUEUE_SIZE);
- 
-  contextPointer->audioOutputBuffer = NULL;
+  // printf("Creating video and audio frame queues...\n");
+  contextPointer->videoFrameQueue = FFmpegFrameQueue_create(FFMPEG_VIDEO_QUEUE_SIZE);
+  // printf("Created video queue\n");
+  contextPointer->audioFrameQueue = FFmpegFrameQueue_create(FFMPEG_AUDIO_QUEUE_SIZE);
+  // printf("Created audio queue\n");
+
+  contextPointer->videoOutputFrameBuffer = nullptr;
   contextPointer->audioOutputChannelLayout = AV_CHANNEL_LAYOUT_STEREO;
 
   contextPointer->swsCtx = nullptr;
@@ -64,6 +70,8 @@ FFmpegContext *FFmpegContext_create()
 
   contextPointer->quit = false;
 
+  // printf("Completed allocating FFmpegContext\n");
+
   return contextPointer;
 }
 
@@ -74,7 +82,7 @@ DEFINE_FUNC_0(hx_ffmpeg_init_ffmpegcontext)
 
 /**
  * @brief Unwraps a Haxe object into an FFmpegContext object.
- * 
+ *
  * @param input The Haxe object to unwrap.
  * @return The FFmpegContext object.
  */
@@ -85,13 +93,14 @@ FFmpegContext *FFmpegContext_unwrap(value input)
   return (FFmpegContext *)val_get_handle(input, kind_FFmpegContext);
 }
 
-void hx_ffmpegcontext_close(value context) {
+void hx_ffmpegcontext_close(value context)
+{
   FFmpegContext_close(FFmpegContext_unwrap(context));
 }
 
 /**
  * @brief Wraps an FFmpegContext object in a Haxe object.
- * 
+ *
  * @param context The FFmpegContext object to wrap.
  * @return A Haxe object containing a pointer to the FFmpegContext.
  */

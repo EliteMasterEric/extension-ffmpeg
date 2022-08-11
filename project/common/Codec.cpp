@@ -7,7 +7,7 @@ int FFmpegContext_avcodec_init_video_codec(FFmpegContext *context)
 
     if (context->videoCodecCtx == nullptr)
     {
-        printf("[extension-ffmpeg] Failed to allocate video codec context.\n");
+        // printf("[extension-ffmpeg] Failed to allocate video codec context.\n");
         return -1;
     }
 
@@ -19,7 +19,7 @@ int FFmpegContext_avcodec_init_video_codec(FFmpegContext *context)
     if (result < 0)
     {
         // Failed to set parameters on codec context.
-        printf("[extension-ffmpeg] Failed to set parameters on video codec context.\n");
+        // printf("[extension-ffmpeg] Failed to set parameters on video codec context.\n");
         return result;
     }
 
@@ -29,19 +29,19 @@ int FFmpegContext_avcodec_init_video_codec(FFmpegContext *context)
     if (result < 0)
     {
         // Failed to open the video codec.
-        printf("[extension-ffmpeg] Failed to open video codec.\n");
+        // printf("[extension-ffmpeg] Failed to open video codec.\n");
         return result;
     }
 
     // Success.
-    printf("[extension-ffmpeg] Successfully initialized video codec.\n");
+    // printf("[extension-ffmpeg] Successfully initialized video codec.\n");
 
     // Perform additional initialization.
     result = FFmpegContext_init_swsCtx(context);
     if (result < 0)
     {
         // Failed to initialize the SWS context.
-        printf("[extension-ffmpeg] Failed to initialize the SWS context.\n");
+        // printf("[extension-ffmpeg] Failed to initialize the SWS context.\n");
         return result;
     }
 
@@ -49,7 +49,7 @@ int FFmpegContext_avcodec_init_video_codec(FFmpegContext *context)
     if (result < 0)
     {
         // Failed to allocate the video frame.
-        printf("[extension-ffmpeg] Failed to allocate the video frame.\n");
+        // printf("[extension-ffmpeg] Failed to allocate the video frame.\n");
         return result;
     }
 
@@ -58,7 +58,7 @@ int FFmpegContext_avcodec_init_video_codec(FFmpegContext *context)
 
 int FFmpegContext_allocate_video_frame(FFmpegContext *context)
 {
-    printf("[extension-ffmpeg] Allocating output frame...\n");
+    // printf("[extension-ffmpeg] Allocating output frame...\n");
     // Determine the required buffer size and allocate it.
     context->videoOutputFrame->format = FFMPEG_PIXEL_FORMAT;
     context->videoOutputFrame->width = context->videoCodecCtx->width;
@@ -82,7 +82,7 @@ int FFmpegContext_allocate_video_frame(FFmpegContext *context)
 
     if (result < 0) {
         // Failed to allocate the image.
-        printf("[extension-ffmpeg] Failed to allocate frame buffer.\n");
+        // printf("[extension-ffmpeg] Failed to allocate frame buffer.\n");
         return result;
     }
 
@@ -92,7 +92,7 @@ int FFmpegContext_allocate_video_frame(FFmpegContext *context)
 
 DEFINE_FUNC_1(hx_ffmpeg_avcodec_init_video_codec, context)
 {
-    printf("[extension-ffmpeg] Initializing video codec.\n");
+    // printf("[extension-ffmpeg] Initializing video codec.\n");
     FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
     int result = FFmpegContext_avcodec_init_video_codec(contextPointer);
 
@@ -112,7 +112,7 @@ int FFmpegContext_avcodec_init_audio_codec(FFmpegContext *context)
 
     if (context->audioCodecCtx == nullptr)
     {
-        printf("[extension-ffmpeg] Failed to allocate audio codec context.\n");
+        // printf("[extension-ffmpeg] Failed to allocate audio codec context.\n");
         return -1;
     }
 
@@ -124,7 +124,7 @@ int FFmpegContext_avcodec_init_audio_codec(FFmpegContext *context)
     if (result < 0)
     {
         // Failed to set parameters on codec context.
-        printf("[extension-ffmpeg] Failed to set parameters on audio codec context.\n");
+        // printf("[extension-ffmpeg] Failed to set parameters on audio codec context.\n");
         return result;
     }
 
@@ -134,19 +134,19 @@ int FFmpegContext_avcodec_init_audio_codec(FFmpegContext *context)
     if (result < 0)
     {
         // Failed to open the video codec.
-        printf("[extension-ffmpeg] Failed to open audio codec.\n");
+        // printf("[extension-ffmpeg] Failed to open audio codec.\n");
         return result;
     }
 
     // Success.
-    printf("[extension-ffmpeg] Successfully initialized audio codec.\n");
+    // printf("[extension-ffmpeg] Successfully initialized audio codec.\n");
 
     // Perform additional initialization.
     result = FFmpegContext_init_swrCtx(context);
     if (result < 0)
     {
         // Failed to initialize the SWS context.
-        printf("[extension-ffmpeg] Failed to initialize the SWR context.\n");
+        // printf("[extension-ffmpeg] Failed to initialize the SWR context.\n");
         return result;
     }
 
@@ -155,7 +155,7 @@ int FFmpegContext_avcodec_init_audio_codec(FFmpegContext *context)
 
 DEFINE_FUNC_1(hx_ffmpeg_avcodec_init_audio_codec, context)
 {
-    printf("[extension-ffmpeg] Initializing audio codec.\n");
+    // printf("[extension-ffmpeg] Initializing audio codec.\n");
     FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
     int result = FFmpegContext_avcodec_init_audio_codec(contextPointer);
 

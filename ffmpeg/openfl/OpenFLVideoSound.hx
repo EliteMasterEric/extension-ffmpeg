@@ -1,6 +1,8 @@
 package ffmpeg.openfl;
 
 import openfl.media.Sound;
+import openfl.media.SoundChannel;
+import openfl.media.SoundTransform;
 import openfl.events.SampleDataEvent;
 import openfl.utils.ByteArray;
 
@@ -10,11 +12,19 @@ import openfl.utils.ByteArray;
 class OpenFLVideoSound extends Sound {
     public var media(default, set):Media;
 
+    public var playing(default, null):Bool = false;
+
     // TODO: Implement a standalone openfl.display.Sound wrapper for FLAC playback, etc.
 
     @:allow(ffmpeg.openfl.OpenFLBitmapVideo)
     private function new() {
         super();
+    }
+
+    public override function play(startTime:Float = 0.0, loops:Int = 0, sndTransform:SoundTransform = null):SoundChannel {
+        trace('OpenFLVideoSound.play');
+        playing = true;
+        return super.play(startTime, loops, sndTransform);
     }
 
     function set_media(mediaIn:Media):Media {
@@ -35,7 +45,7 @@ class OpenFLVideoSound extends Sound {
     }
 
     function generateSound(event:SampleDataEvent):Void {
-        trace('Generating sound...');
+        // trace('Generating sound...');
         if (event.data == null)
             event.data = new ByteArray();
 

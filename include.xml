@@ -3,4 +3,8 @@
 
 	<ndll name="extension-ffmpeg" />
 	
+	<!--
+	<haxelib name="haxe-concurrent" />
+	-->
+	
 </extension>

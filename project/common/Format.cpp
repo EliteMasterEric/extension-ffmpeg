@@ -9,9 +9,12 @@
  */
 DEFINE_FUNC_2(hx_ffmpeg_avformat_open_input, context, filename)
 {
+  // printf("Opening input...\n");
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   const char* filenamePointer = val_get_string(filename);
+  // printf("%s\n", filenamePointer);
   int result = avformat_open_input(&contextPointer->avFormatCtx, filenamePointer, NULL, NULL);
+  // printf("Opened input.\n");
 
   return alloc_int(result);
 }
@@ -42,7 +45,7 @@ int FFmpegContext_av_find_video_stream(FFmpegContext* context) {
 
   // If we found a video stream, cache its info.
   if (videoStreamIndex >= 0) {
-    printf("[extension-ffmpeg] Found video stream %d.\n", videoStreamIndex);
+    // printf("[extension-ffmpeg] Found video stream %d.\n", videoStreamIndex);
     context->videoStreamIndex = videoStreamIndex;
     context->videoStream = context->avFormatCtx->streams[videoStreamIndex];
     context->videoCodec = videoCodec;
@@ -62,7 +65,7 @@ int FFmpegContext_av_find_audio_stream(FFmpegContext* context) {
 
   // If we found an audio stream, cache its info.
   if (audioStreamIndex >= 0) {
-    printf("[extension-ffmpeg] Found audio stream %d.\n", audioStreamIndex);
+    // printf("[extension-ffmpeg] Found audio stream %d.\n", audioStreamIndex);
     context->audioStreamIndex = audioStreamIndex;
     context->audioStream = context->avFormatCtx->streams[audioStreamIndex];
     context->audioCodec = audioCodec;
@@ -82,13 +85,13 @@ int FFmpegContext_av_find_subtitle_stream(FFmpegContext* context) {
 
   // If we found a subtitle stream, cache its info.
   if (subtitleStreamIndex >= 0) {
-    printf("[extension-ffmpeg] Found subtitle stream %d.\n", subtitleStreamIndex);
+    // printf("[extension-ffmpeg] Found subtitle stream %d.\n", subtitleStreamIndex);
     context->subtitleStreamIndex = subtitleStreamIndex;
     context->subtitleStream = context->avFormatCtx->streams[subtitleStreamIndex];
     context->subtitleCodec = subtitleCodec;
   } else {
     // An error occurred.
-    printf("[extension-ffmpeg] No subtitle stream\n");
+    // printf("[extension-ffmpeg] No subtitle stream\n");
   }
   return subtitleStreamIndex;
 }
@@ -102,12 +105,12 @@ void FFmpegContext_av_dump_format(FFmpegContext* context) {
   av_dump_format(context->avFormatCtx, 0, "debug.log", 0);
 
   // Let's dump some other stuff too.
-  printf("========================================================\n");
-  printf("[extension-ffmpeg] Additional information:\n");
-  printf("Average frame rate: %f\n", av_q2d(context->videoStream->avg_frame_rate));
-  printf("Timebase: %d/%d\n", context->videoStream->time_base.num, context->videoStream->time_base.den);
-  printf("Real framerate: %f\n", av_q2d(context->videoStream->r_frame_rate));
-  printf("========================================================\n");
+  // printf("========================================================\n");
+  // printf("[extension-ffmpeg] Additional information:\n");
+  // // printf("Average frame rate: %f\n", av_q2d(context->videoStream->avg_frame_rate));
+  // // printf("Timebase: %d/%d\n", context->videoStream->time_base.num, context->videoStream->time_base.den);
+  // // printf("Real framerate: %f\n", av_q2d(context->videoStream->r_frame_rate));
+  // printf("========================================================\n");
 }
 
 /**
@@ -159,7 +162,7 @@ DEFINE_FUNC_1(hx_ffmpeg_av_find_best_audio_stream, context)
  */
 DEFINE_FUNC_1(hx_ffmpeg_av_find_best_subtitle_stream, context)
 {
-  printf("[extension-ffmpeg] av_find_best_subtitle_stream\n");
+  // printf("[extension-ffmpeg] av_find_best_subtitle_stream\n");
   FFmpegContext* contextPointer = FFmpegContext_unwrap(context);
   int result = FFmpegContext_av_find_subtitle_stream(contextPointer);
 

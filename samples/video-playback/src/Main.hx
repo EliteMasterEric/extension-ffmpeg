@@ -7,6 +7,7 @@ package;
 import ffmpeg.Error.FFmpegError;
 import ffmpeg.Media;
 import ffmpeg.openfl.OpenFLBitmapVideo;
+import ffmpeg.openfl.OpenFLSound;
 import ffmpeg.Version;
 import openfl.display.Bitmap;
 import openfl.display.Sprite;
@@ -42,6 +43,7 @@ class Main extends Sprite {
   }
 
   var video:OpenFLBitmapVideo;
+  var sound:OpenFLSound;
 
   public function loadVideo():Void {
     // var filePath:String = "https://upload.wikimedia.org/wikipedia/commons/c/c5/Limes.webm";
@@ -55,9 +57,17 @@ class Main extends Sprite {
     // var filePath:String = "file:assets/travolta.webm";
     // var filePath:String = "https://uploads.ungrounded.net/alternate/1528000/1528775_alternate_113347_r88.zip/assets/music/stressCutscene.mp4";
 
-    video = new OpenFLBitmapVideo();
-    video.open(filePath);
-    addChild(video);
+    trace('Loading video...');
+
+    if (true) {
+      video = new OpenFLBitmapVideo();
+      video.open(filePath);
+      addChild(video);
+    } else {
+      sound = new OpenFLSound();
+      sound.open(filePath);
+      sound.play();
+    }
 
     var fps = new openfl.display.FPS(10, 10, 0x000000);
     addChild(fps);
@@ -66,6 +76,7 @@ class Main extends Sprite {
   function onKeyPress(event:KeyboardEvent) {
     switch(event.keyCode) {
       case Keyboard.SPACE:
+        trace('Playing video...');
         video.play();
       default:
         // do nothing

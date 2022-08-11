@@ -129,6 +129,7 @@ typedef struct FFmpegFrameQueue
   // Assignment operator
   FFmpegFrameQueue &operator=(const FFmpegFrameQueue &o)
   {
+    // printf("FFmpegFrameQueue assignment\n");
     queue = o.queue;
 
     size = o.size;
@@ -145,6 +146,7 @@ typedef struct FFmpegFrameQueue
   // Constructor
   FFmpegFrameQueue()
   {
+    // printf("FFmpegFrameQueue constructor()\n");
     queue = NULL;
 
     size = 0;
@@ -197,7 +199,8 @@ typedef struct
 
   // The frame queue for the audio stream.
   FFmpegFrameQueue* audioFrameQueue;
-  buffer audioOutputBuffer;
+  size_t audioOutputFrameSize;
+  uint8_t *audioOutputFrameBuffer;
   AVChannelLayout audioOutputChannelLayout;
 
   // The software scaler context.
@@ -231,17 +234,39 @@ void initialize_Structures();
 
 AVFrame *FFmpegFrameQueue_pop(FFmpegFrameQueue* queue);
 bool is_FFmpegContext(value v);
+buffer cffi_build_buffer(unsigned char *data, int length);
+buffer cffi_safe_build_buffer(unsigned char *data, int length);
+buffer cffi_safe_alloc_buffer_len(int length);
 FFmpegContext *FFmpegContext_unwrap(value input);
+FFmpegFrameQueue* FFmpegFrameQueue_create(int maxSize);
 int FFmpeg_emit_audio_frame(FFmpegContext *context, value callback);
 int FFmpegContext_init_swrCtx(FFmpegContext *context);
 int FFmpegContext_init_swsCtx(FFmpegContext *context);
 int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context);
 int FFmpegContext_sws_scale_video_frame(FFmpegContext *context);
 int FFmpegFrameQueue_size(FFmpegFrameQueue* queue);
-void FFmpegFrameQueue_create(FFmpegFrameQueue* queue, int maxSize);
+void cffi_safe_call_1(value operation, value arg);
 void FFmpegFrameQueue_push(FFmpegFrameQueue* queue, AVFrame *frame);
 void hx_throw_exception(const char *message);
-buffer cffi_build_buffer(unsigned char* data, int length);
+
+// 
+// Template functions get redefined with each use,
+// meaning there is no conflict when defining them in Core.
+// 
+
+/**
+ * @brief Call one or more operations in a Haxe-safe manner.
+ * 
+ * @param operation A lambda containing the operation to call.
+ */
+template <typename Callable>
+void cffi_safe_operation(Callable operation)
+{
+  int base = 0;
+  gc_set_top_of_stack(&base, true);
+  operation();
+  gc_set_top_of_stack((int *)0, true);
+}
 
 #if defined(FFMPEG_CORE_CPP)
 //

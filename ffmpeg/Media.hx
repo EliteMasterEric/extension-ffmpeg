@@ -5,6 +5,7 @@ import ffmpeg._internal.Callback;
 import ffmpeg.Error;
 import ffmpeg.Error.FFmpegError;
 import haxe.io.BytesData;
+// import hx.concurrent.lock.RLock;
 import openfl.display.BitmapData;
 import openfl.utils.ByteArray;
 
@@ -84,8 +85,16 @@ class Media {
 
   // Byte array containing the video frame data.
   private var videoFrameBuffer(default, null):ByteArray;
+
   // Byte array containing the audio frame data.
   private var soundOutputBuffer(default, null):ByteArray;
+
+  #if cpp
+  /**
+   * The `soundOutputBuffer` needs a mutex, to prevent data from being overridden while it is being read.
+   */
+  private var soundOutputBufferMutex = new sys.thread.Mutex();
+  #end
 
   #if openfl
   // A BitmapData object containing the current video frame.
@@ -105,7 +114,10 @@ class Media {
    * @throws FFmpegError if the context could not be initialized.
    */
   private function buildContext():Dynamic {
-    return CppUtil.loadFunction("hx_ffmpeg_init_ffmpegcontext", 0)();
+    trace('Building FFmpegContext...');
+    var result = CppUtil.loadFunction("hx_ffmpeg_init_ffmpegcontext", 0)();
+    trace('Context built.');
+    return result;
   }
 
   /**
@@ -115,8 +127,11 @@ class Media {
    * @throws FFmpegError if the media file could not be opened.
    */
   public function openInput(url:String, video:Bool = true, audio:Bool = true):Void {
+    trace('Opening media file...');
     var result:Int = CppUtil.loadFunction("hx_ffmpeg_avformat_open_input", 2)(context, url);
     Error.handleError(result);
+
+    trace('Media file opened');
 
     mediaLoaded = true;
 
@@ -130,6 +145,8 @@ class Media {
   function fetchStreamInfo(video:Bool = true, audio:Bool = true):Void {
     if (!mediaLoaded)
       return;
+
+    trace('Fetching stream info...');
 
     var result:Int = CppUtil.loadFunction("hx_ffmpeg_avformat_find_stream_info", 1)(context);
     Error.handleError(result);
@@ -152,6 +169,8 @@ class Media {
     try {
       if (!streamInfoLoaded)
         return false;
+
+      trace('Fetching video stream...');
 
       var result:Int = CppUtil.loadFunction("hx_ffmpeg_av_find_best_video_stream", 1)(context);
       Error.handleError(result);
@@ -219,6 +238,8 @@ class Media {
       if (!hasVideo)
         return;
 
+      trace('Starting video codec...');
+
       var result:Int = CppUtil.loadFunction("hx_ffmpeg_avcodec_init_video_codec", 1)(context);
       Error.handleError(result);
 
@@ -276,98 +297,57 @@ class Media {
     }
   }
 
-  static final FRAME_AGAIN = 0;
-  static final FRAME_VIDEO = 1;
-  static final FRAME_AUDIO = 2;
-  static final FRAME_SUBTITLE = 2;
-  static final FRAME_FULL = 100;
+  public function startPlaybackThreads():Void {
+    if (!hasVideo && !hasAudio)
+      throw "No streams initialized for this media file.";
 
-  /**
-   * Decode a single packet from the media file.
-   * The packet may contain partial or complete video or audio data.
-   */
-  public function decodeFrame():Int {
-    try {
-      if (!videoReady && !audioReady)
-        throw EStreamNotFound;
+    // Start the decoding thread.
+    startDecodeThread();
 
-      var result:Int = CppUtil.loadFunction("hx_ffmpeg_decode_frame", 2)(context, handleAudioFrame);
-      Error.handleError(result);
-
-      return result;
+    if (hasVideo) {
+      startVideoThread();
     }
-    catch (e:FFmpegError) {
-      switch (e) {
-        case ETryAgain:
-          // We need to pass more data into the decoder.
-          return FRAME_AGAIN;
-        default:
-          throw e;
-      }
+    if (hasAudio) {
+      startAudioThread();
     }
   }
 
-  /**
-   * Continually decode packets from the media file until the desired data is available.
-   */
-  function decodeUntil(targetFrameType:Int) {
-    var result:Int = FRAME_AGAIN;
+  function startDecodeThread():Void {
+    var result:Int = CppUtil.loadFunction("hx_ffmpeg_start_decode_thread", 1)(context);
+    Error.handleError(result);
+  }
 
-    do {
-      try {
-        result = decodeFrame();
-      }
-      catch (e:FFmpegError) {
-        switch (e) {
-          case EEndOfFile:
-            // We've reached the end of the file.
-            return;
-          case ETryAgain:
-            // We need to pass more data into the decoder.
-            result = 0;
-          default:
-            throw e;
-        }
-      }
-    }
-    while (result != targetFrameType);
+  function startVideoThread():Void {
+    // Start the video playback thread.
+    var result = CppUtil.loadFunction("hx_ffmpeg_start_video_thread", 2)(context, handleVideoFrame);
+    Error.handleError(result);
+  }
+
+  function startAudioThread():Void {
+    // Start the audio playback thread.
+    var result = CppUtil.loadFunction("hx_ffmpeg_start_audio_thread", 2)(context, handleAudioFrame);
+    Error.handleError(result);
   }
 
   /**
-   * Continually decode packets from the media file until a new video frame is available.
+   * Callback function which receives a video frame from the video thread for playback.
+   * Should be called whenever there is a new frame to display.
    */
-  public inline function decodeVideoFrame():Void {
-    decodeUntil(FRAME_VIDEO);
-  }
+  var lastStamp:Float = 0;
 
-  /**
-   * Continually decode packets from the media file until new audio data is available.
-   */
-  public inline function decodeAudioFrame():Void {
-    decodeUntil(FRAME_AUDIO);
-  }
+  function handleVideoFrame(data:BytesData):Void {
+    // Set the video frame buffer to the newly provided frame data.
+    var newStamp = haxe.Timer.stamp();
+    var diffStamp = newStamp - lastStamp;
+    lastStamp = newStamp;
+    trace('[MEDIA] Received video frame (delay: ' + diffStamp + ')');
 
-  /**
-   * Manually fetch the next video frame, and place the result in the `videoFrameBuffer` buffer.
-   */
-  public function fetchVideoFrame():Void {
-    try {
-      if (!videoReady)
-        throw EStreamNotFound;
+    // Implicit cast.
+    videoFrameBuffer = data;
 
-      videoFrameBuffer.position = 0;
-      var inBuffer:BytesData = videoFrameBuffer; // Cast to BytesData.
-      var result:Int = CppUtil.loadFunction("hx_ffmpeg_emit_video_frame", 2)(context, inBuffer);
-      Error.handleError(result);
-
-      printPixel(0, 0);
-    }
-    catch (e:FFmpegError) {
-      switch (e) {
-        default:
-          throw e;
-      }
-    }
+    #if openfl
+    // populateBitmapData();
+    #end
   }
 
   #if openfl
@@ -378,31 +358,40 @@ class Media {
    * Only available if the `openfl` library is included.
    */
   public function populateBitmapData():BitmapData {
+    // trace('[MEDIA] Populating bitmap data...');
+
     // Initialize the bitmap data if necessary.
     if (videoBitmapData == null) {
       videoBitmapData = new BitmapData(videoWidth, videoHeight, true, 0x00000000);
     }
-    
-    // Copy the frame data into the bitmap.
-    videoFrameBuffer.position = 0;
-    videoBitmapData.lock();
-    videoBitmapData.setPixels(videoBitmapData.rect, videoFrameBuffer);
-    videoBitmapData.unlock();
 
+    if (videoFrameBuffer.length < (videoWidth * videoHeight * 4)) {
+      trace('[MEDIA] Video frame buffer is too small, cannot render.');
+    } else {
+      // Copy the frame data into the bitmap.
+      videoFrameBuffer.position = 0;
+      videoBitmapData.lock();
+      videoBitmapData.setPixels(videoBitmapData.rect, videoFrameBuffer);
+      videoBitmapData.unlock();
+    }
     return videoBitmapData;
   }
   #end
 
   /**
-   * Automatically handle the next audio frame, and place the result in the `audioBuffer` buffer.
-   * @param data The audio data from the decoder. Basically an `Array<cpp.UInt8>`.
+   * Callback function which receives an audio frame from the audio thread for playback.
+   * Should be called whenever there is a new frame to play.
    */
   function handleAudioFrame(data:BytesData):Void {
+    // trace('[MEDIA] Received audio frame...');
+
+    soundOutputBufferMutex.acquire();
+
     // Append the new data to the end of the buffer.
     soundOutputBuffer.position = soundOutputBuffer.length;
     soundOutputBuffer.writeBytes(data, 0, data.length);
 
-    trace('Appended ' + data.length + ' bytes to the sound output buffer (now ' + soundOutputBuffer.length + ' bytes).');
+    soundOutputBufferMutex.release();
   }
 
   /**
@@ -414,7 +403,8 @@ class Media {
     if (data == null)
       throw 'The output buffer cannot be null.';
 
-    trace('Writing bytes to sound output buffer...');
+    soundOutputBufferMutex.acquire();
+
     var bytesAvailable, bytesToWrite, blanksToWrite, bytesRemaining:Int;
 
     if (!audioReady) {
@@ -431,7 +421,6 @@ class Media {
       bytesRemaining = bytesAvailable - bytesToWrite;
     }
 
-    trace('Writing ' + bytesToWrite + ' bytes to the output buffer, and ' + blanksToWrite + ' blank bytes.');
     if (bytesToWrite > 0) {
       data.writeBytes(soundOutputBuffer, 0, bytesToWrite);
     }
@@ -451,6 +440,8 @@ class Media {
       // Replace the buffer with an empty one. This is easier than writing zeros.
       soundOutputBuffer = new ByteArray();
     }
+
+    soundOutputBufferMutex.release();
   }
 
   /**
@@ -495,38 +486,32 @@ interface IMedia {
    * This will do nothing if the media is not currently playing.
    */
   // public function stop():Void;
-
   /**
    * Attempt to restart media playback.
    * This will reset the position to the beginning and start playback.
    */
   // public function restart():Void;
-
   /**
    * Attempt to pause media playback.
    * Later calling `play()` will resume playback from the current position.
    * This will do nothing if the media is not currently playing.
    */
   // public function pause():Void;
-
   /**
    * Attempt to resume media playback.
    * This will do nothing if the media has not previously started by calling `play()`.
    */
   // public function resume():Void;
-
   /**
    * Toggle pause on media playback.
    * If the media is paused, it will play, and if the media is playing, it will pause.
    */
   // public function togglePause():Void;
-
   /**
    * Attempt to seek to the specified position, a specific time in seconds.
    * This will do nothing if the media is not currently playing.
    */
   // public function setPosition(time:Float):Void;
-
   /**
    * Attempt to seek to the specified position, a percentage of the media's duration.
    * This will do nothing if the media is not currently playing.
@@ -534,24 +519,20 @@ interface IMedia {
    * @param percent A percentage value between 0 and 1.
    */
   // public function setPositionPercent(percent:Float):Void;
-
   /**
    * Retrieve the duration of the media, in seconds.
    */
   // public function getDuration():Float;
-
   /**
    * Retrieve the current position in the media, in seconds.
   **/
   // public function getPosition():Float;
-
   /**
    * Retrieve the current position in the media, as a percentage of the media's duration.
    *
    * @return A percentage value between 0 and 1.
    */
   // public function getPositionPercent():Float;
-
   /**
    * Whether the media should immediately restart playback upon completion.
    */
@@ -565,7 +546,6 @@ interface IAudio extends IMedia {
    * The volume of the media, between [0, 1].
    */
   // public var volume(get, set):Float;
-
   /**
    * Whether the media is muted.
    * Toggling this value prevents audio playback,
@@ -581,9 +561,8 @@ interface IVideo extends IAudio {
    * The width of the output video, in pixels, during playback.
    */
   // public var videoWidth(get, set):Int;
-
   /**
    * The height of the output video, in pixels, during playback.
    */
-  // public var videoHeight(get, set):Int; 
+  // public var videoHeight(get, set):Int;
 }

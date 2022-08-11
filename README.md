@@ -28,7 +28,9 @@ Then, follow these steps:
 
 This will generate the necessary `.a` files that you need to build the extension.
 
-To build the extension itself, run `lime rebuild extension-ffmpeg windows`. You will need to repeat this step if you change any of the C++ files located in the `project` folder.
+To build the extension itself, run `lime rebuild extension-ffmpeg windows`. 
+You will need to repeat this step if you change any of the C++ files located in the `project` folder.
+Be sure to run `lime rebuild extension-ffmpeg windows -debug` instead if you are planning to debug the target application.
 
 # Building on Linux
 
@@ -45,7 +47,9 @@ To build `extension-ffmpeg` from source, follow these steps:
 
 This will generate the necessary `.a` files that you need to build the extension.
 
-To build the extension itself, run `lime rebuild extension-ffmpeg linux`. You will need to repeat this step if you change any of the C++ files located in the `project` folder.
+To build the extension itself, run `lime rebuild extension-ffmpeg linux`.
+You will need to repeat this step if you change any of the C++ files located in the `project` folder.
+Be sure to run `lime rebuild extension-ffmpeg linux -debug` instead if you are planning to debug the target application.
 
 # Building on MacOS
 
@@ -62,7 +66,9 @@ To build `extension-ffmpeg` from source, follow these steps:
 
 This will generate the necessary `.a` files that you need to build the extension.
 
-To build the extension itself, run `lime rebuild extension-ffmpeg mac`. You will need to repeat this step if you change any of the C++ files located in the `project` folder.
+To build the extension itself, run `lime rebuild extension-ffmpeg mac`.
+You will need to repeat this step if you change any of the C++ files located in the `project` folder.
+Be sure to run `lime rebuild extension-ffmpeg mac -debug` instead if you are planning to debug the target application.
 
 ## Building for android
 
@@ -82,17 +88,13 @@ this is still on testing, only 64 bits is supported as of now
 
 ## Building on Other Platforms
 
-<<<<<<< HEAD
 Support for other platforms (Android, iOS, HTML5 via emscripten) is in development.
-=======
-Support for other platforms (MacOS, iOS, HTML5 via emscripten) is in development.
->>>>>>> randomxdp/master
 
 ## License
 
-The code within the repository of `extension-ffmpeg` is made available under the permissive MIT License.
+The `extension-ffmpeg` library is made available under the permissive MIT License.
 
-This software uses code of [FFmpeg](http://ffmpeg.org) licensed under the [LGPLv3.0](https://www.gnu.org/licenses/lgpl-3.0.html) and its sources can be downloaded [here](https://git.ffmpeg.org/ffmpeg).
+This software utilizes libraries provided by [FFmpeg](http://ffmpeg.org), licensed under the [LGPLv3.0](https://www.gnu.org/licenses/lgpl-3.0.html). Its sources can be downloaded [here](https://git.ffmpeg.org/ffmpeg).
 
 ## Credits
 
