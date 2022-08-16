@@ -59,7 +59,7 @@ FFmpegContext *FFmpegContext_create(int videoQueueSize, int audioQueueSize)
   // printf("Created audio queue\n");
 
   contextPointer->videoOutputFrameBuffer = nullptr;
-  contextPointer->audioOutputChannelLayout = AV_CHANNEL_LAYOUT_STEREO;
+  contextPointer->audioOutputChannelLayout = FFMPEG_CHANNEL_LAYOUT;
 
   contextPointer->audioOutputFrameBuffer = nullptr;
   contextPointer->audioOutputFrameSize = 0;

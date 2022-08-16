@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xml>
 
-  <!-- Variables and compile flags. -->
-  <set name="HXCPP_CPP11" value="1" />
+  <!-- Variables and compile flags.
+    <set name="HXCPP_CPP11" value="1" />
+  -->
   <set name="OUTPUT_DIR" value="../ndll" unless="OUTPUT_DIR" />
   <set name="DEBUGEXTRA" value="-debug" if="fulldebug" />
   <set name="LIBSUFFIX" value="${HX_TARGET_SUFFIX}" if="HX_TARGET_SUFFIX" />
@@ -70,13 +71,15 @@
     <compilerflag value="-Iinclude" />
     <compilerflag value="-I${LIBFFMPEG_SRC}" />
 
+    <compilerflag value="/std:c++20" />
+
     <compilerflag value="-D_ISOC99_SOURCE" />
+    <compilerflag value="-D_GNU_SOURCE=1" />
     <compilerflag value="-D_FILE_OFFSET_BITS=64" />
     <compilerflag value="-D_LARGEFILE_SOURCE" />
     <compilerflag value="-DPIC" />
     <compilerflag value="-DZLIB_CONST" />
     <compilerflag value="-DHAVE_AV_CONFIG_H" />
-    <compilerflag value="-D_GNU_SOURCE=1" />
     <compilerflag value="-D_THREAD_SAFE" />
 
     <!-- Dependencies of CFFI. -->

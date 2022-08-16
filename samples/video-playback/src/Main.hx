@@ -44,7 +44,6 @@ class Main extends Sprite {
     trace('libswscale version: ' + Version.getLibswscaleVersion());
     trace('avcodec_configuration: ' + Version.getAvcodecConfiguration());
     trace('avcodec_license: ' + Version.getAvcodecLicense());
-<<<<<<< Updated upstream
 
     trace('===========================================================');
   }
@@ -89,15 +88,6 @@ class Main extends Sprite {
         video.play();
       default:
         // do nothing
-=======
-
-    try {
-      var media = new Media();
-      media.open('assets/earth.mp4');
-      media.dumpInfo();
-    } catch (FFmpegErrorType error) {
-      trace(error);
->>>>>>> Stashed changes
     }
   }
 

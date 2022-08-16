@@ -35,7 +35,7 @@ int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context, AVFrame* audi
     int in_rate = context->audioCodecCtx->sample_rate;
     int in_samples = audioFrame->nb_samples;
     int out_samples = av_rescale_rnd(swr_get_delay(context->swrCtx, in_rate) + in_samples, FFMPEG_BITRATE, in_rate, AV_ROUND_UP);
-    AVChannelLayout out_ch_layout = FFMPEG_CHANNEL_LAYOUT;
+    AVChannelLayout out_ch_layout = context->audioOutputChannelLayout;
     int out_channels = out_ch_layout.nb_channels;
 
     context->audioOutputFrameSize = av_samples_get_buffer_size(NULL, out_channels, out_samples, AV_SAMPLE_FMT_FLT, 1);

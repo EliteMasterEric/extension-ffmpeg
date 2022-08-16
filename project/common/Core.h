@@ -170,7 +170,7 @@ typedef struct FFmpegFrameQueue
  * A new one is created when a file is loaded, and accumulates and caches
  * information about the stream as it becomes needed.
  */
-typedef struct
+typedef struct FFmpegContext
 {
   // The format context.
   // This acts as an abstraction for the CONTAINER of the input file.
