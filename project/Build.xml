@@ -11,7 +11,6 @@
   <set name="ndll-tool" value="dll" unless="iphone" />
   <set name="ndll-tool" value="static" if="iphone" />
 
-<<<<<<< Updated upstream
   <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
 
   <!-- Include HXCPP common build flags. -->
@@ -19,35 +18,6 @@
 
   <echo value="==========================" />
   <echo value="Building extension-ffmpeg..." />
-=======
-  <!-- Include HXCPP common build flags. -->
-  <include name="${HXCPP}/build-tool/BuildCommon.xml" />
-
-  <!-- Print useful information. -->
-  <section unless="quiet">
-    <echo value="------------------------" />
-
-    <echo value="Building extension-ffmpeg..." />
-
-    <echo value="Target type: HXCPP_M32" if="HXCPP_M32" />
-    <echo value="Target type: HXCPP_M64" if="HXCPP_M64" />
-    <echo value="Target type: HXCPP_ARM64" if="HXCPP_ARM64" />
-    <echo value="Target type: mingw" if="mingw" />
-    <echo value="Target type: HXCPP_MINGW" if="HXCPP_MINGW" />
-    <echo value="Target type: HXCPP_DEBUGGER" if="HXCPP_DEBUGGER" />
-
-    <echo value="Target operating system: Windows" if="windows" />
-    <echo value="Target operating system: Android" if="android" />
-    <echo value="Target operating system: Mac"     if="mac" />
-    <echo value="Target operating system: Linux"   if="linux" />
-    
-    <echo value="------------------------" />
-  </section>
-
-  <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
-  <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows32" if="windows HXCPP_M32" />
-  <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows64" if="windows HXCPP_M64" />
->>>>>>> Stashed changes
 
   <section if="windows HXCPP_M32">
     <echo value="Target platform: Windows (x32)" />
@@ -117,7 +87,6 @@
       The CFFI interface source.
       Split into multiple files for organizational purposes.
     -->
-<<<<<<< Updated upstream
     <depend name="common/HaxeCFFI.h" />
     <file name="common/HaxeCFFI.cpp" />
 
@@ -141,19 +110,10 @@
     <file name="common/SoftwareScale.cpp" />
     <depend name="common/Structures.h" />
     <file name="common/Structures.cpp" />
-    <depend name="common/Syncronization.h"  />
+    <depend name="common/Syncronization.h" />
     <file name="common/Syncronization.cpp" />
     <depend name="common/Version.h" />
     <file name="common/Version.cpp" />
-=======
-    <file name="common/Core.cpp" />
-    <file name="common/Error.cpp" />
-    <file name="common/Format.cpp" />
-    <file name="common/Structures.cpp" />
-    <file name="common/Version.cpp" />
-
-    <!-- NOTE: This one can't build without linking the shared library? -->
->>>>>>> Stashed changes
   </files>
 
   <!-- The target NDLL file. -->
@@ -166,19 +126,19 @@
       <ext value=".ndll" />
 
       <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
-    
+
       <!-- avcodec -->
-      <lib name="Mfplat.lib" if="windows"/>
-      <lib name="Mfuuid.lib" if="windows"/>
-      <lib name="Ole32.lib" if="windows"/>
-      <lib name="strmiids.lib" if="windows"/>
-      
+      <lib name="Mfplat.lib" if="windows" />
+      <lib name="Mfuuid.lib" if="windows" />
+      <lib name="Ole32.lib" if="windows" />
+      <lib name="strmiids.lib" if="windows" />
+
       <!-- avformat -->
-      <lib name="Secur32.lib" if="windows"/>
-      <lib name="Ws2_32.lib" if="windows"/>
-      
+      <lib name="Secur32.lib" if="windows" />
+      <lib name="Ws2_32.lib" if="windows" />
+
       <!-- avutil -->
-      <lib name="bcrypt.lib" if="windows"/>
+      <lib name="bcrypt.lib" if="windows" />
 
       <lib name="avcodec.lib" />
       <lib name="avdevice.lib" />
@@ -187,8 +147,8 @@
       <lib name="avutil.lib" />
       <lib name="swresample.lib" />
       <lib name="swscale.lib" />
-    
-      <files id="core" />  
+
+      <files id="core" />
     </section>
 
     <section if="mac">
