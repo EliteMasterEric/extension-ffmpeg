@@ -13,10 +13,11 @@ FLAGS="$FLAGS --logfile=../build.log"
 FLAGS="$FLAGS --enable-version3"
 
 # Add HTTPS support.
-FLAGS="$FLAGS --enable-openssl"
+#FLAGS="$FLAGS --enable-openssl"
 #FLAGS="$FLAGS --enable-libvpx"
 
 # Add x86-specific flags here.
+flags="$flags --arch=x86"
 FLAGS="$FLAGS --toolchain=msvc"
 FLAGS="$FLAGS --enable-static"
 
