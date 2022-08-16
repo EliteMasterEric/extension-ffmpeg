@@ -7,13 +7,25 @@ int FFmpeg_emit_video_frame(FFmpegContext *context, value emitVideoCallback)
 
     // Convert the video frame from YUV (or whatever it is) to an RGB frame.
     // printf("[extension-ffmpegV] Start software scaling...\n");
-    int result = FFmpegContext_sws_scale_video_frame(context);
+    AVFrame* videoFrame = FFmpegFrameQueue_pop(context->videoFrameQueue);
+    if (videoFrame == nullptr)
+    {
+        printf("[extension-ffmpegV] No video frame available. You may see a stutter.\n");
+        return -1;
+    }
+
+    int result = FFmpegContext_sws_scale_video_frame(context, videoFrame);
 
     if (result < 0)
     {
         // Failed to convert the video frame.
         // printf("[extension-ffmpegV] Failed to convert video frame.\n");
         return result;
+    }
+
+    if (val_is_null(emitVideoCallback)) {
+        // We don't need to emit the video frame, it will be retrieved from the frame buffer later.
+        return 0;
     }
 
     // Since we are in a thread, allocating the buffer and executing the callback
@@ -26,17 +38,30 @@ int FFmpeg_emit_video_frame(FFmpegContext *context, value emitVideoCallback)
         // printf("[extension-ffmpegV] Emitting video frame via callback...\n");
         value out_buffer_val = buffer_val(out_buffer);
         val_call1(emitVideoCallback, out_buffer_val);
-        // printf("[extension-ffmpegV] Emitted video frame to callback...\n");
+        // printf("[extension-ffmpegV] Emitted video frame to callback...\n"); });
     });
-
-    if (result < 0)
-    {
-        // Failed to copy the video frame.
-        // printf("[extension-ffmpegV] Failed to copy video frame.\n");
-        return result;
-    }
-
     return 0;
+}
+
+double FFmpeg_sync_video_pts(FFmpegContext *context, AVFrame* avFrame)
+{
+    double framePTS = avFrame->pts;
+
+    if (framePTS != 0 && framePTS != AV_NOPTS_VALUE) {
+        // If we have an up-to-date PTS, update the clock.
+        context->videoClock = framePTS;
+    } else {
+        // If we don't have a valid PTS, then set it to the current time.
+        framePTS = context->videoClock;
+    }
+    
+    // Update the time to use for the next frame.
+    double frameDelay = context->videoTimeBase;
+    /* if we are repeating a frame, adjust clock accordingly */
+    frameDelay += avFrame->repeat_pict * (context->videoTimeBase * 0.5);
+    context->videoClock += frameDelay;
+
+    return framePTS;
 }
 
 /**
@@ -48,6 +73,47 @@ void FFmpeg_video_thread(FFmpegContext *context, value emitVideoCallback)
     // printf("[extension-ffmpeg] Video thread started.\n");
     while (!context->quit)
     {
+        double delayPTS = context->videoOutputFrame->pts - context->videoLastFramePts;
+        double delaySeconds = delayPTS * context->videoTimeBase;
+
+        if (delaySeconds <= 0.0 || delaySeconds >= 1.0) {
+            // Use the previous delay if the current one is invalid.
+            delaySeconds = context->videoLastFramePts * context->videoTimeBase;
+        }
+
+        context->videoLastFramePts = context->videoOutputFrame->pts;
+        context->videoLastFrameDelay = delayPTS;
+
+        // Sync with audio output.
+        double audioClock = context->audioClock;
+        double diffPTS = context->videoOutputFrame->pts - audioClock;
+        double diffSeconds = diffPTS * context->videoTimeBase;
+
+        double syncThreshold = (diffSeconds > FFMPEG_SYNC_THRESHOLD) ? diffSeconds : FFMPEG_SYNC_THRESHOLD;
+
+        // Based on audio delay, skip or repeat the current frame.
+        if (fabs(diffSeconds) < FFMPEG_NOSYNC_THRESHOLD) {
+            if(diffSeconds <= -syncThreshold) {
+                // Immediately display the next frame.
+	            delaySeconds = 0;
+	        } else if(diffSeconds >= syncThreshold) {
+                // Wait to display the next frame.
+	            delaySeconds = 2 * delaySeconds;
+	        }
+        }
+
+        context->videoTimer += delaySeconds;
+        double realDelay = context->videoTimer - (av_gettime() / 1000000.0);
+
+        // Limit to 100 FPS.
+        if (realDelay < 0.01) {
+            realDelay = 0.01;
+        }
+
+        // WAIT for the next frame.
+        av_usleep((unsigned int)(realDelay * 1000000.0));
+
+        // Then we display it.
         int result = FFmpeg_emit_video_frame(context, emitVideoCallback);
         if (result < 0)
         {

@@ -64,10 +64,14 @@ int FFmpeg_decodeFrame(FFmpegContext *context)
                 }
                 else
                 {
-                    // printf("[extension-ffmpeg] Queuing video frame.\n");
                     // Attempt to queue the video frame.
                     // The decoding thread will pause if the video queue is full.
-                    FFmpegFrameQueue_push(context->videoFrameQueue, videoFrame);
+                    // printf("[extension-ffmpeg] Queuing video frame (%d / %d)...\n", context->videoFrameQueue->size, context->audioFrameQueue->size);
+
+                    // If the audio queue is empty, we need to start dumping video frames
+                    // so we can catch up in the decoding process.
+                    bool forcePush = context->audioFrameQueue->size == 0;
+                    FFmpegFrameQueue_push(context->videoFrameQueue, videoFrame, forcePush);
 
                     // printf("[extension-ffmpeg] Success.\n");
                     // Positive 1 = successful video frame.
@@ -79,6 +83,13 @@ int FFmpeg_decodeFrame(FFmpegContext *context)
     else if (pkt.stream_index == context->audioStreamIndex)
     {
         // printf("[extension-ffmpeg] Packet contains an audio frame\n");
+
+        // Fetch the audio packet's timestamp for synchronizing the video stream.
+        if (pkt.pts != AV_NOPTS_VALUE)
+        {
+            // NOTE: This does not account for how much of the buffer has been used.
+            context->audioClock = pkt.pts;
+        }
 
         if (context->audioCodecCtx == nullptr)
         {
@@ -109,10 +120,14 @@ int FFmpeg_decodeFrame(FFmpegContext *context)
                 }
                 else
                 {
-                    // printf("[extension-ffmpeg] Queuing audio frame.\n");
                     // Attempt to queue the audio frame.
                     // The decoding thread will pause if the audio queue is full.
-                    FFmpegFrameQueue_push(context->audioFrameQueue, audioFrame);
+                    // printf("[extension-ffmpeg] Queuing audio frame (%d / %d)...\n", context->videoFrameQueue->size, context->audioFrameQueue->size);
+
+                    // If the video queue is empty, we need to start dumping audio frames
+                    // so we can catch up in the decoding process.
+                    bool forcePush = context->videoFrameQueue->size == 0;
+                    FFmpegFrameQueue_push(context->audioFrameQueue, audioFrame, forcePush);
 
                     // printf("[extension-ffmpeg] Success.\n");
                     // Positive 2 = successful audio frame.
@@ -129,7 +144,7 @@ int FFmpeg_decodeFrame(FFmpegContext *context)
     else
     {
         // Unknown stream index for frame.
-        // printf("[extension-ffmpeg] Packet contains an unknown frame (maybe from an uninitialized stream?)\n");
+        printf("[extension-ffmpeg] Packet contains an unknown frame (maybe from an uninitialized stream?)\n");
         result = 0;
     }
 
@@ -145,11 +160,11 @@ int FFmpeg_decodeFrame(FFmpegContext *context)
  */
 void FFmpeg_decode_thread(FFmpegContext *context)
 {
-    // printf("[extension-ffmpeg] Decode thread started.\n");
+    printf("[extension-ffmpeg] Decode thread started.\n");
     while (!context->quit)
     {
         int result = FFmpeg_decodeFrame(context);
-        if (result == 0)
+        if (result == 0 || result == AVERROR(EAGAIN))
         {
             // Decode another frame.
             continue;
@@ -166,13 +181,13 @@ void FFmpeg_decode_thread(FFmpegContext *context)
         }
         else if (result == AVERROR_EOF)
         {
-            // printf("[extension-ffmpeg] Successfully decoded all frames.\n");
+            printf("[extension-ffmpeg] Successfully decoded all frames.\n");
             break;
         }
         else
         {
             // Failed to decode the frame.
-            // printf("[extension-ffmpeg] Failed to decode frame: %d\n", result);
+            printf("[extension-ffmpeg] Failed to decode frame: %d\n", result);
             break;
         }
     }

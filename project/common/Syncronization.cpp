@@ -4,11 +4,11 @@
  * @brief Initialize the frame queue.
  * @param queue The frame queue to initialize.
  */
-FFmpegFrameQueue* FFmpegFrameQueue_create(int maxSize)
+FFmpegFrameQueue *FFmpegFrameQueue_create(int maxSize)
 {
     // printf("Initializing frame queue with size %d\n", maxSize);
 
-    FFmpegFrameQueue* queue = new FFmpegFrameQueue;
+    FFmpegFrameQueue *queue = new FFmpegFrameQueue;
 
     // Create a new FFmpegContext struct.
     queue->size = 0;
@@ -18,7 +18,7 @@ FFmpegFrameQueue* FFmpegFrameQueue_create(int maxSize)
 
     // printf("Allocating frame pointer array... %d\n", maxSize);
     // Allocate space for the frame pointers.
-    queue->queue = new AVFrame*[maxSize];
+    queue->queue = new AVFrame *[maxSize];
     // printf("Allocated frame pointer array.");
 
     // Do NOT initialize mutex and cond.
@@ -29,11 +29,12 @@ FFmpegFrameQueue* FFmpegFrameQueue_create(int maxSize)
 /**
  * @brief Push a frame onto the queue.
  *        This is done in a thread-safe manner.
- * 
+ *
  * @param queue The queue to push the frame onto.
  * @param frame The frame to push onto the queue.
+ * @param force Whether to force the frame onto the queue, even if it is full.
  */
-void FFmpegFrameQueue_push(FFmpegFrameQueue* queue, AVFrame *frame)
+void FFmpegFrameQueue_push(FFmpegFrameQueue *queue, AVFrame *frame, bool force)
 {
     // Wait until we have access to the queue.
     // printf("Attempting frame queue push...\n");
@@ -47,32 +48,43 @@ void FFmpegFrameQueue_push(FFmpegFrameQueue* queue, AVFrame *frame)
     // (lock_guard is not used because it is incompatible with condition variables.)
     std::unique_lock<std::mutex> lck(queue->mutex);
 
+    // printf("WAITING to push frame to queue.\n");
+
     // We use a condition variable to wait until the queue has space for a new frame,
     // unlocking the mutex while we wait.
-    queue->cond.wait(lck, [queue] { return queue->size < queue->maxSize; });
+    queue->cond.wait(lck, [queue, force]
+                     { return queue->size < queue->maxSize || force; });
+
+    // printf("READY to push frame to queue.\n");
 
     // At this point, there is space in the queue AND the mutex is locked,
     // so we can safely push the frame.
 
-    // printf("READY to push frame to queue.\n");
-
-    // Push the frame onto the queue.
-    queue->queue[queue->writeIndex] = frame;
-    queue->writeIndex = (queue->writeIndex + 1) % queue->maxSize;
-    queue->size++;
+    if (force && queue->size == queue->maxSize) {
+        // Forcibly push the frame onto the queue, destroying the first frame.
+        printf("Forcibly pushing frame onto queue.\n");
+        queue->queue[queue->writeIndex] = frame;
+        queue->writeIndex = (queue->writeIndex + 1) % queue->maxSize;
+        // DON'T increment the size.
+    } else {
+        // Push the frame onto the queue normally.
+        queue->queue[queue->writeIndex] = frame;
+        queue->writeIndex = (queue->writeIndex + 1) % queue->maxSize;
+        queue->size++;
+    }
 
     // Signal that the queue is not empty.
     queue->cond.notify_one();
 }
 
 /**
- * @brief Pop a frame from the queue.
+ * @brief Pop a frame from the queue. If no data is available, wait until data is available.
  *        This is done in a thread-safe manner.
- * 
+ *
  * @param queue The queue to pop from.
  * @return The popped frame.
  */
-AVFrame* FFmpegFrameQueue_pop(FFmpegFrameQueue* queue)
+AVFrame *FFmpegFrameQueue_pop(FFmpegFrameQueue *queue)
 {
     // Wait until we have access to the queue.
     // printf("Attempting frame queue pop...\n");
@@ -82,7 +94,8 @@ AVFrame* FFmpegFrameQueue_pop(FFmpegFrameQueue* queue)
     // Create a unique_lock to lock the mutex within the current scope.
     // Wait until the queue has a frame to read (free the mutex while we wait).
     std::unique_lock<std::mutex> lck(queue->mutex);
-    queue->cond.wait(lck, [queue] { return queue->size > 0; });
+    queue->cond.wait(lck, [queue]
+                     { return queue->size > 0; });
 
     // printf("READY to pop frame from queue.\n");
 
@@ -90,6 +103,57 @@ AVFrame* FFmpegFrameQueue_pop(FFmpegFrameQueue* queue)
     AVFrame *frame = queue->queue[queue->readIndex];
     queue->readIndex = (queue->readIndex + 1) % queue->maxSize;
     queue->size--;
+
+    // Signal that the queue is not full.
+    queue->cond.notify_one();
+    queue->mutex.unlock();
+    return frame;
+}
+
+/**
+ * @brief Pop a frame from the queue. If no data is available, return NULL.
+ *        This is done in a thread-safe manner.
+ *
+ * @param queue The queue to pop from.
+ * @return The popped frame.
+ */
+AVFrame *FFmpegFrameQueue_tryPop(FFmpegFrameQueue *queue)
+{
+    // Wait until we have access to the queue.
+    queue->mutex.lock();
+
+    AVFrame *frame = NULL;
+
+    // If the queue is empty, return NULL.
+    if (queue->size > 0)
+    {
+        // Otherwise, pop the frame.
+        frame = queue->queue[queue->readIndex];
+        queue->readIndex = (queue->readIndex + 1) % queue->maxSize;
+        queue->size--;
+    }
+
+    // Signal that the queue is not full.
+    queue->cond.notify_one();
+    queue->mutex.unlock();
+    return frame;
+}
+
+/**
+ * @brief Fetch the current frame of the queue without popping it.
+ *        This is done in a thread-safe manner.
+ */
+AVFrame *FFmpegFrameQueue_peek(FFmpegFrameQueue *queue)
+{
+    // Create a unique_lock to lock the mutex within the current scope.
+    // Wait until the queue has a frame to read (free the mutex while we wait).
+    std::unique_lock<std::mutex> lck(queue->mutex);
+    queue->cond.wait(lck, [queue]
+                     { return queue->size > 0; });
+
+    // The mutex is locked again, and the queue is ready for a new frame.
+    AVFrame *frame = queue->queue[queue->readIndex];
+    // DON'T update the read index or size.
 
     // Signal that the queue is not empty.
     queue->cond.notify_one();

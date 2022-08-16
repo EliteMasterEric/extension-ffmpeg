@@ -25,7 +25,7 @@ bool is_FFmpegContext(value input)
  *
  * @return A pointer to a new FFmpegContext struct.
  */
-FFmpegContext *FFmpegContext_create()
+FFmpegContext *FFmpegContext_create(int videoQueueSize, int audioQueueSize)
 {
   // printf("Allocating FFmpegContext...\n");
   FFmpegContext *contextPointer = (FFmpegContext *)malloc(sizeof(FFmpegContext));
@@ -53,13 +53,18 @@ FFmpegContext *FFmpegContext_create()
   contextPointer->videoOutputFrameBuffer = nullptr;
 
   // printf("Creating video and audio frame queues...\n");
-  contextPointer->videoFrameQueue = FFmpegFrameQueue_create(FFMPEG_VIDEO_QUEUE_SIZE);
+  contextPointer->videoFrameQueue = FFmpegFrameQueue_create(videoQueueSize);
   // printf("Created video queue\n");
-  contextPointer->audioFrameQueue = FFmpegFrameQueue_create(FFMPEG_AUDIO_QUEUE_SIZE);
+  contextPointer->audioFrameQueue = FFmpegFrameQueue_create(audioQueueSize);
   // printf("Created audio queue\n");
 
   contextPointer->videoOutputFrameBuffer = nullptr;
   contextPointer->audioOutputChannelLayout = AV_CHANNEL_LAYOUT_STEREO;
+
+  contextPointer->audioOutputFrameBuffer = nullptr;
+  contextPointer->audioOutputFrameSize = 0;
+  contextPointer->audioOutputLeftoverBuffer = nullptr;
+  contextPointer->audioOutputLeftoverBufferSize = 0;
 
   contextPointer->swsCtx = nullptr;
   contextPointer->swrCtx = nullptr;
@@ -75,9 +80,12 @@ FFmpegContext *FFmpegContext_create()
   return contextPointer;
 }
 
-DEFINE_FUNC_0(hx_ffmpeg_init_ffmpegcontext)
+DEFINE_FUNC_2(hx_ffmpeg_init_ffmpegcontext, videoQueueValue, audioQueueValue)
 {
-  return FFmpegContext_wrap(FFmpegContext_create());
+  // Use the provided values.
+  int videoQueueSize = val_int(videoQueueValue);
+  int audioQueueSize = val_int(audioQueueValue);
+  return FFmpegContext_wrap(FFmpegContext_create(videoQueueSize, audioQueueSize));
 }
 
 /**

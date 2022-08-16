@@ -5,6 +5,7 @@ import ffmpeg._internal.Callback;
 import ffmpeg.Error;
 import ffmpeg.Error.FFmpegError;
 import haxe.io.BytesData;
+import haxe.io.Bytes;
 // import hx.concurrent.lock.RLock;
 import openfl.display.BitmapData;
 import openfl.utils.ByteArray;
@@ -17,7 +18,7 @@ class Media {
   /**
    * `generateSound()` must output at least this many bytes.
    */
-  static final REQUIRED_SAMPLES = 2048 * 4 * 2;
+  public static final REQUIRED_SAMPLES = 2048 * 4 * 2;
 
   /**
    * Stores a pointer to the `FFmpegContext` in C++.
@@ -113,9 +114,11 @@ class Media {
    * Build an FFmpegContext object, used to hold information about the media.
    * @throws FFmpegError if the context could not be initialized.
    */
+  static final VIDEO_QUEUE_SIZE = 48;
+  static final AUDIO_QUEUE_SIZE = 32;
   private function buildContext():Dynamic {
     trace('Building FFmpegContext...');
-    var result = CppUtil.loadFunction("hx_ffmpeg_init_ffmpegcontext", 0)();
+    var result = CppUtil.loadFunction("hx_ffmpeg_init_ffmpegcontext", 2)(VIDEO_QUEUE_SIZE, AUDIO_QUEUE_SIZE);
     trace('Context built.');
     return result;
   }
@@ -308,7 +311,7 @@ class Media {
       startVideoThread();
     }
     if (hasAudio) {
-      startAudioThread();
+      // startAudioThread();
     }
   }
 
@@ -340,7 +343,7 @@ class Media {
     var newStamp = haxe.Timer.stamp();
     var diffStamp = newStamp - lastStamp;
     lastStamp = newStamp;
-    trace('[MEDIA] Received video frame (delay: ' + diffStamp + ')');
+    // trace('[MEDIA] Received video frame (rate: ' + 1/diffStamp + ')');
 
     // Implicit cast.
     videoFrameBuffer = data;
@@ -366,7 +369,7 @@ class Media {
     }
 
     if (videoFrameBuffer.length < (videoWidth * videoHeight * 4)) {
-      trace('[MEDIA] Video frame buffer is too small, cannot render.');
+      // trace('[MEDIA] Video frame buffer is too small, cannot render.');
     } else {
       // Copy the frame data into the bitmap.
       videoFrameBuffer.position = 0;
@@ -402,7 +405,17 @@ class Media {
   public function generateSound(data:ByteArray):Void {
     if (data == null)
       throw 'The output buffer cannot be null.';
+    
+    // Extend the buffer if needed.
+    if (data.length < REQUIRED_SAMPLES)
+      data.length = REQUIRED_SAMPLES;
 
+    var dataPointer:BytesData = data;
+    var result = CppUtil.loadFunction("hx_ffmpeg_generate_audio", 3)(context, dataPointer, REQUIRED_SAMPLES);
+    Error.handleError(result);
+  }
+
+  function generateSoundOld(data:ByteArray):Void {
     soundOutputBufferMutex.acquire();
 
     var bytesAvailable, bytesToWrite, blanksToWrite, bytesRemaining:Int;
@@ -425,6 +438,7 @@ class Media {
       data.writeBytes(soundOutputBuffer, 0, bytesToWrite);
     }
     if (blanksToWrite > 0) {
+      trace('[MEDIA] Audio buffer is too small, ${blanksToWrite} bytes of silence.');
       var count = 0;
       while (count < blanksToWrite) {
         data.writeByte(0);

@@ -26,13 +26,11 @@ int FFmpegContext_init_swrCtx(FFmpegContext *context)
     return 0;
 }
 
-int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context) {
+int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context, AVFrame* audioFrame) {
     if (context->swrCtx == nullptr) {
         // printf("[extension-ffmpeg] Software resampler not initialized.\n");
         return -1;
     }
-
-    AVFrame *audioFrame = FFmpegFrameQueue_pop(context->audioFrameQueue);
 
     int in_rate = context->audioCodecCtx->sample_rate;
     int in_samples = audioFrame->nb_samples;
@@ -49,6 +47,11 @@ int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context) {
 
     // Takes a number of SAMPLES as an argument, not a number of bytes.
     int result = swr_convert(context->swrCtx, &context->audioOutputFrameBuffer, out_samples, in_buffer, in_samples);
+
+    /* Keep audio_clock up-to-date as we decode packets */
+    int pts = context->audioClock;
+    int n = 2 * context->audioCodecCtx->channels;
+    context->audioClock += (double) context->audioOutputFrameSize / (double)(n * context->audioCodecCtx->sample_rate);
 
     if (result < 0) {
         // printf("[extension-ffmpeg] Failed to resample the audio frame.\n");

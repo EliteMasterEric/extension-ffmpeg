@@ -53,6 +53,12 @@ int FFmpegContext_avcodec_init_video_codec(FFmpegContext *context)
         return result;
     }
 
+    // Set some synchronization parameters.
+    context->videoTimeBase = av_q2d(context->videoStream->time_base);
+    context->videoTimer = (double)av_gettime() / 1000000.0;
+    context->videoClock = 0;
+    context->videoLastFrameDelay = 40e-3;
+    context->videoLastFramePts = 0;
     return 0;
 }
 
@@ -149,6 +155,9 @@ int FFmpegContext_avcodec_init_audio_codec(FFmpegContext *context)
         // printf("[extension-ffmpeg] Failed to initialize the SWR context.\n");
         return result;
     }
+
+    context->audioClock = 0;
+    context->audioTimeBase = av_q2d(context->audioStream->time_base);
 
     return 0;
 }

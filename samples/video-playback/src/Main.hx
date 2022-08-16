@@ -70,7 +70,9 @@ class Main extends Sprite {
     }
 
     var fps = new openfl.display.FPS(10, 10, 0x000000);
+    var ram = new MemoryCounter(10, 50, 0x000000);
     addChild(fps);
+    addChild(ram);
   }
 
   function onKeyPress(event:KeyboardEvent) {

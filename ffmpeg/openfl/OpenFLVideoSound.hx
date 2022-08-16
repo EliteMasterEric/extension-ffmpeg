@@ -47,7 +47,7 @@ class OpenFLVideoSound extends Sound {
     function generateSound(event:SampleDataEvent):Void {
         // trace('Generating sound...');
         if (event.data == null)
-            event.data = new ByteArray();
+            event.data = new ByteArray(Media.REQUIRED_SAMPLES);
 
         media.generateSound(event.data);
     }

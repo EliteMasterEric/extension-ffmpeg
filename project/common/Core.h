@@ -37,6 +37,7 @@ extern "C"
 
 #include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
+#include <libavutil/time.h>
 
 #include <libswresample/swresample.h>
 #include <libswresample/version.h>
@@ -50,6 +51,8 @@ extern "C"
 #define FFMPEG_CHANNEL_LAYOUT AV_CHANNEL_LAYOUT_STEREO
 #define FFMPEG_VIDEO_QUEUE_SIZE 8
 #define FFMPEG_AUDIO_QUEUE_SIZE 16
+#define FFMPEG_SYNC_THRESHOLD 0.01
+#define FFMPEG_NOSYNC_THRESHOLD 1.0
 
 // Only include IMPLEMENT_API in ONE .cpp file.
 // Otherwise you get a linker error.
@@ -203,6 +206,9 @@ typedef struct
   uint8_t *audioOutputFrameBuffer;
   AVChannelLayout audioOutputChannelLayout;
 
+  uint8_t *audioOutputLeftoverBuffer;
+  size_t audioOutputLeftoverBufferSize;
+
   // The software scaler context.
   struct SwsContext *swsCtx;
 
@@ -213,6 +219,22 @@ typedef struct
   std::thread* decodeThread;
   std::thread* audioThread;
   std::thread* videoThread;
+
+  // The video's time base, as a decimal.
+  double videoTimeBase;
+  // The current time of the video. The unit is the video's time base.
+  // Thus, videoTimeBase * videoClock = video time in seconds.
+  double videoClock;
+  // PTS of the last displayed frame.
+  double videoLastFramePts;
+  // Delay of the last displayed frame.
+  double videoLastFrameDelay;
+  double videoTimer;
+
+  // The current time of the audio. The unit is the audio's time base.
+  double audioClock;
+  // The audio's time base, as a decimal.
+  double audioTimeBase;
 
   // Set to true when the FFmpegContext is ready to be destroyed.
   bool quit;
@@ -233,20 +255,23 @@ void initialize_Structures();
 //
 
 AVFrame *FFmpegFrameQueue_pop(FFmpegFrameQueue* queue);
+AVFrame *FFmpegFrameQueue_tryPop(FFmpegFrameQueue *queue);
+AVFrame* FFmpegFrameQueue_peek(FFmpegFrameQueue* queue);
 bool is_FFmpegContext(value v);
 buffer cffi_build_buffer(unsigned char *data, int length);
-buffer cffi_safe_build_buffer(unsigned char *data, int length);
 buffer cffi_safe_alloc_buffer_len(int length);
+buffer cffi_safe_build_buffer(unsigned char *data, int length);
+double FFmpeg_sync_video_pts(FFmpegContext *context, AVFrame *frame);
+double FFmpegContext_get_audio_clock(FFmpegContext *context);
 FFmpegContext *FFmpegContext_unwrap(value input);
 FFmpegFrameQueue* FFmpegFrameQueue_create(int maxSize);
 int FFmpeg_emit_audio_frame(FFmpegContext *context, value callback);
 int FFmpegContext_init_swrCtx(FFmpegContext *context);
 int FFmpegContext_init_swsCtx(FFmpegContext *context);
-int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context);
-int FFmpegContext_sws_scale_video_frame(FFmpegContext *context);
-int FFmpegFrameQueue_size(FFmpegFrameQueue* queue);
+int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context, AVFrame *frame);
+int FFmpegContext_sws_scale_video_frame(FFmpegContext *context, AVFrame *frame);
 void cffi_safe_call_1(value operation, value arg);
-void FFmpegFrameQueue_push(FFmpegFrameQueue* queue, AVFrame *frame);
+void FFmpegFrameQueue_push(FFmpegFrameQueue* queue, AVFrame *frame, bool force);
 void hx_throw_exception(const char *message);
 
 // 
