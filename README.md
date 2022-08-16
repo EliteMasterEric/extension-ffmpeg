@@ -18,15 +18,17 @@ To build `extension-ffmpeg` from source, perform these steps to fetch dependenci
 2. Install Visual Studio 2019, installing the following components:
 - `MSVC v142 - VS 2019 C++ x64/x86 build tools`
 - `Windows SDK (10.0.17763.0)`
-3. Install MSYS2.
+3. Install MSYS2. I installed to the `C:/CPP/msys64` directory.
 4. Navigate to the project folder and call `git submodule update --init --recursive --remote` to download the source for FFmpeg.
 
 Then, follow these steps:
 1. Open `x64 Native Tools Command Prompt for VS 2019` and call `"C:\CPP\msys64\msys2_shell.cmd" -use-full-path`.
 2. Call `pacman -Su git wget make tar unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake autoconf automake libtool mingw-w64-x86_64-jq python zstd nasm` (one-time step).
-3. Navigate to the project folder and run `./lib.src/build_winmsys.sh`.
+3. Navigate to the project folder, enter `./lib.src/`, and run `./build_win64.sh` to build the `Windows64` library files.
+4. Do the same with the `x86 Native Tools` and run `build_win32.sh` to build the `Windows32` library files.
+  - This is necessary because `lime rebuild` performs two builds, one for each architecture.
 
-This will generate the necessary `.a` files that you need to build the extension.
+This will generate the necessary `.lib` files that you need to build the extension.
 
 To build the extension itself, run `lime rebuild extension-ffmpeg windows`. 
 You will need to repeat this step if you change any of the C++ files located in the `project` folder.

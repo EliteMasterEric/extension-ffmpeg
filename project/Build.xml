@@ -11,6 +11,7 @@
   <set name="ndll-tool" value="dll" unless="iphone" />
   <set name="ndll-tool" value="static" if="iphone" />
 
+<<<<<<< Updated upstream
   <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
 
   <!-- Include HXCPP common build flags. -->
@@ -18,6 +19,35 @@
 
   <echo value="==========================" />
   <echo value="Building extension-ffmpeg..." />
+=======
+  <!-- Include HXCPP common build flags. -->
+  <include name="${HXCPP}/build-tool/BuildCommon.xml" />
+
+  <!-- Print useful information. -->
+  <section unless="quiet">
+    <echo value="------------------------" />
+
+    <echo value="Building extension-ffmpeg..." />
+
+    <echo value="Target type: HXCPP_M32" if="HXCPP_M32" />
+    <echo value="Target type: HXCPP_M64" if="HXCPP_M64" />
+    <echo value="Target type: HXCPP_ARM64" if="HXCPP_ARM64" />
+    <echo value="Target type: mingw" if="mingw" />
+    <echo value="Target type: HXCPP_MINGW" if="HXCPP_MINGW" />
+    <echo value="Target type: HXCPP_DEBUGGER" if="HXCPP_DEBUGGER" />
+
+    <echo value="Target operating system: Windows" if="windows" />
+    <echo value="Target operating system: Android" if="android" />
+    <echo value="Target operating system: Mac"     if="mac" />
+    <echo value="Target operating system: Linux"   if="linux" />
+    
+    <echo value="------------------------" />
+  </section>
+
+  <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
+  <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows32" if="windows HXCPP_M32" />
+  <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows64" if="windows HXCPP_M64" />
+>>>>>>> Stashed changes
 
   <section if="windows HXCPP_M32">
     <echo value="Target platform: Windows (x32)" />
@@ -87,6 +117,7 @@
       The CFFI interface source.
       Split into multiple files for organizational purposes.
     -->
+<<<<<<< Updated upstream
     <depend name="common/HaxeCFFI.h" />
     <file name="common/HaxeCFFI.cpp" />
 
@@ -114,25 +145,70 @@
     <file name="common/Syncronization.cpp" />
     <depend name="common/Version.h" />
     <file name="common/Version.cpp" />
+=======
+    <file name="common/Core.cpp" />
+    <file name="common/Error.cpp" />
+    <file name="common/Format.cpp" />
+    <file name="common/Structures.cpp" />
+    <file name="common/Version.cpp" />
+
+    <!-- NOTE: This one can't build without linking the shared library? -->
+>>>>>>> Stashed changes
   </files>
 
   <!-- The target NDLL file. -->
   <target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
     <outdir name="${OUTPUT_DIR}/${BINDIR}" />
 
+<<<<<<< Updated upstream
+=======
+    <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
+
+    <lib name="avcodec.lib" />
+    <lib name="avdevice.lib" />
+    <lib name="avfilter.lib" />
+    <lib name="avformat.lib" />
+    <lib name="avutil.lib" />
+    <lib name="swresample.lib" />
+    <lib name="swscale.lib" />
+
+    <files id="core" />
+
+>>>>>>> Stashed changes
     <ext value=".so" />
 
     <section if="windows">
       <ext value=".ndll" />
+<<<<<<< Updated upstream
 
       <!-- TODO: Readd from working build.xml -->
       <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
 
       <files id="core" />
+=======
+      
+      <!-- avcodec -->
+      <lib name="Mfplat.lib" if="windows"/>
+      <lib name="Mfuuid.lib" if="windows"/>
+      <lib name="Ole32.lib" if="windows"/>
+      <lib name="strmiids.lib" if="windows"/>
+      
+      <!-- avformat -->
+      <lib name="Secur32.lib" if="windows"/>
+      <lib name="Ws2_32.lib" if="windows"/>
+      
+      <!-- avutil -->
+      <lib name="bcrypt.lib" if="windows"/>
+    </section>
+
+    <section if="mac">
+      <ext value=".ndll" />
+>>>>>>> Stashed changes
     </section>
 
     <section if="linux">
       <ext value=".ndll" />
+<<<<<<< Updated upstream
 
       <!-- Prioritize local built libs over system libs. -->
       <flag value="-L${LIBFFMPEG_BUILD}" />
@@ -232,6 +308,9 @@
       <lib name="-lswresample" />
       <lib name="-lswscale" />
       <files id="core" />
+=======
+      <lib name="-lpthread" />
+>>>>>>> Stashed changes
     </section>
   </target>
 

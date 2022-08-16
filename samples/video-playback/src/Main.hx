@@ -11,9 +11,15 @@ import ffmpeg.openfl.OpenFLSound;
 import ffmpeg.Version;
 import openfl.display.Bitmap;
 import openfl.display.Sprite;
+<<<<<<< Updated upstream
 import openfl.events.KeyboardEvent;
 import openfl.ui.Keyboard;
 import sys.db.ResultSet;
+=======
+import ffmpeg.Error.FFmpegErrorType;
+import ffmpeg.Version;
+import ffmpeg.Media;
+>>>>>>> Stashed changes
 
 class Main extends Sprite {
   public function new() {
@@ -38,6 +44,7 @@ class Main extends Sprite {
     trace('libswscale version: ' + Version.getLibswscaleVersion());
     trace('avcodec_configuration: ' + Version.getAvcodecConfiguration());
     trace('avcodec_license: ' + Version.getAvcodecLicense());
+<<<<<<< Updated upstream
 
     trace('===========================================================');
   }
@@ -82,6 +89,15 @@ class Main extends Sprite {
         video.play();
       default:
         // do nothing
+=======
+
+    try {
+      var media = new Media();
+      media.open('assets/earth.mp4');
+      media.dumpInfo();
+    } catch (FFmpegErrorType error) {
+      trace(error);
+>>>>>>> Stashed changes
     }
   }
 

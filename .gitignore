@@ -8,7 +8,11 @@
 /ndll/*
 .DS_Store
 /lib.src/build.log
+<<<<<<< Updated upstream
 /lib.build/
 
 # Include the NDLLs for people who can't build.
 !/ndll/*/*.ndll
+=======
+/lib.build/
+>>>>>>> Stashed changes
