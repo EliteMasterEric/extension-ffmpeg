@@ -160,33 +160,13 @@
   <target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
     <outdir name="${OUTPUT_DIR}/${BINDIR}" />
 
-<<<<<<< Updated upstream
-=======
-    <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
-
-    <lib name="avcodec.lib" />
-    <lib name="avdevice.lib" />
-    <lib name="avfilter.lib" />
-    <lib name="avformat.lib" />
-    <lib name="avutil.lib" />
-    <lib name="swresample.lib" />
-    <lib name="swscale.lib" />
-
-    <files id="core" />
-
->>>>>>> Stashed changes
     <ext value=".so" />
 
     <section if="windows">
       <ext value=".ndll" />
-<<<<<<< Updated upstream
 
-      <!-- TODO: Readd from working build.xml -->
       <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
-
-      <files id="core" />
-=======
-      
+    
       <!-- avcodec -->
       <lib name="Mfplat.lib" if="windows"/>
       <lib name="Mfuuid.lib" if="windows"/>
@@ -199,16 +179,24 @@
       
       <!-- avutil -->
       <lib name="bcrypt.lib" if="windows"/>
+
+      <lib name="avcodec.lib" />
+      <lib name="avdevice.lib" />
+      <lib name="avfilter.lib" />
+      <lib name="avformat.lib" />
+      <lib name="avutil.lib" />
+      <lib name="swresample.lib" />
+      <lib name="swscale.lib" />
+    
+      <files id="core" />  
     </section>
 
     <section if="mac">
       <ext value=".ndll" />
->>>>>>> Stashed changes
     </section>
 
     <section if="linux">
       <ext value=".ndll" />
-<<<<<<< Updated upstream
 
       <!-- Prioritize local built libs over system libs. -->
       <flag value="-L${LIBFFMPEG_BUILD}" />
@@ -308,9 +296,6 @@
       <lib name="-lswresample" />
       <lib name="-lswscale" />
       <files id="core" />
-=======
-      <lib name="-lpthread" />
->>>>>>> Stashed changes
     </section>
   </target>
 

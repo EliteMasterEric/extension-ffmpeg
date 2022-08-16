@@ -13,7 +13,7 @@ FLAGS="$FLAGS --logfile=../build.log"
 FLAGS="$FLAGS --enable-version3"
 
 # Add HTTPS support.
-FLAGS="$FLAGS --enable-openssl"
+#FLAGS="$FLAGS --enable-openssl"
 # FLAGS="$FLAGS --enable-libvpx"
 
 # Add x64-specific flags here.
