@@ -25,8 +25,13 @@ Then, follow these steps:
 1. Open `x64 Native Tools Command Prompt for VS 2019` and call `"C:\CPP\msys64\msys2_shell.cmd" -use-full-path`.
 2. Call `pacman -Su git wget make tar unzip zip mingw-w64-x86_64-gcc mingw-w64-x86_64-gdb mingw-w64-x86_64-cmake autoconf automake libtool mingw-w64-x86_64-jq python zstd nasm` (one-time step).
 3. Navigate to the project folder, enter `./lib.src/`, and run `./build_win64.sh` to build the `Windows64` library files.
-4. Do the same with the `x86 Native Tools` and run `build_win32.sh` to build the `Windows32` library files.
+
+Now, we need to build libraries for 32-bit machines.
   - This is necessary because `lime rebuild` performs two builds, one for each architecture.
+1. Open `x86 Native Tools Command Prompt for VS 2019` and call `"C:\CPP\msys64\msys2_shell.cmd" -use-full-path`.
+3. Navigate to the project folder, enter `./lib.src/ffmpeg`, and run `make clean`.
+  - This gets rid of any artifacts from the previous 64-bit build.
+4. Move back to `./lib.src/` and run `build_win32.sh` to build the `Windows32` library files.
 
 This will generate the necessary `.lib` files that you need to build the extension.
 
