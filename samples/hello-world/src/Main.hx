@@ -26,10 +26,6 @@ class Main extends Sprite {
     trace('libswscale version: ' + Version.getLibswscaleVersion());
     trace('avcodec_configuration: ' + Version.getAvcodecConfiguration());
     trace('avcodec_license: ' + Version.getAvcodecLicense());
-<<<<<<< Updated upstream
-=======
-    trace('protocols: ' + Version.listProtocols());
->>>>>>> Stashed changes
   }
 
   public static function quit():Void {
