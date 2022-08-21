@@ -322,15 +322,18 @@ class Media {
 
   function startVideoThread():Void {
     // Start the video playback thread.
-    var result = CppUtil.loadFunction("hx_ffmpeg_start_video_thread", 2)(context, handleVideoFrame);
+    var result = CppUtil.loadFunction("hx_ffmpeg_start_video_thread", 2)(context, null);
     Error.handleError(result);
   }
 
+  /*
+  // The audio thread is deprecated and no longer used.
   function startAudioThread():Void {
     // Start the audio playback thread.
     var result = CppUtil.loadFunction("hx_ffmpeg_start_audio_thread", 2)(context, handleAudioFrame);
     Error.handleError(result);
   }
+  */
 
   /**
    * Callback function which receives a video frame from the video thread for playback.
@@ -344,16 +347,22 @@ class Media {
     var diffStamp = newStamp - lastStamp;
     lastStamp = newStamp;
     // trace('[MEDIA] Received video frame (rate: ' + 1/diffStamp + ')');
-
+  
     // Implicit cast.
     videoFrameBuffer = data;
-
+  
     #if openfl
     // populateBitmapData();
     #end
   }
 
-  #if openfl
+  function generateVideo() {
+    // Take the most recently received video frame and put it in the buffer.
+    var dataPointer:BytesData = videoFrameBuffer;
+    var result = CppUtil.loadFunction("hx_ffmpeg_generate_video", 2)(context, dataPointer);
+    Error.handleError(result);
+  }
+
   /**
    * Populate a BitmapData object with the next video frame and return it.
    * We reuse the BitmapData between calls to avoid allocating a new object each time.
@@ -361,17 +370,18 @@ class Media {
    * Only available if the `openfl` library is included.
    */
   public function populateBitmapData():BitmapData {
-    // trace('[MEDIA] Populating bitmap data...');
-
     // Initialize the bitmap data if necessary.
     if (videoBitmapData == null) {
       videoBitmapData = new BitmapData(videoWidth, videoHeight, true, 0x00000000);
     }
 
+    generateVideo();
+
     if (videoFrameBuffer.length < (videoWidth * videoHeight * 4)) {
       // trace('[MEDIA] Video frame buffer is too small, cannot render.');
     } else {
       // Copy the frame data into the bitmap.
+      // TODO: Is this process intensive?
       videoFrameBuffer.position = 0;
       videoBitmapData.lock();
       videoBitmapData.setPixels(videoBitmapData.rect, videoFrameBuffer);
@@ -379,7 +389,6 @@ class Media {
     }
     return videoBitmapData;
   }
-  #end
 
   /**
    * Callback function which receives an audio frame from the audio thread for playback.

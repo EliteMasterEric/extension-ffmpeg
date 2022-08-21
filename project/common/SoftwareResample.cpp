@@ -50,7 +50,7 @@ int FFmpegContext_swr_resample_audio_frame(FFmpegContext *context, AVFrame* audi
 
     /* Keep audio_clock up-to-date as we decode packets */
     int pts = context->audioClock;
-    int n = 2 * context->audioCodecCtx->channels;
+    int n = 2 * context->audioCodecCtx->ch_layout.nb_channels;
     context->audioClock += (double) context->audioOutputFrameSize / (double)(n * context->audioCodecCtx->sample_rate);
 
     if (result < 0) {

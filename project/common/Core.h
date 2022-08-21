@@ -196,9 +196,11 @@ typedef struct FFmpegContext
 
   // The frame queue for the video stream.
   FFmpegFrameQueue* videoFrameQueue;
+
+  // The frame we write the rescaled frame data to.
   AVFrame *videoOutputFrame;
-  size_t videoOutputFrameSize;
   uint8_t *videoOutputFrameBuffer;
+  size_t videoOutputFrameSize;
 
   // The frame queue for the audio stream.
   FFmpegFrameQueue* audioFrameQueue;

@@ -11,15 +11,9 @@ import ffmpeg.openfl.OpenFLSound;
 import ffmpeg.Version;
 import openfl.display.Bitmap;
 import openfl.display.Sprite;
-<<<<<<< Updated upstream
 import openfl.events.KeyboardEvent;
 import openfl.ui.Keyboard;
 import sys.db.ResultSet;
-=======
-import ffmpeg.Error.FFmpegErrorType;
-import ffmpeg.Version;
-import ffmpeg.Media;
->>>>>>> Stashed changes
 
 class Main extends Sprite {
   public function new() {

@@ -23,23 +23,25 @@ int FFmpeg_emit_video_frame(FFmpegContext *context, value emitVideoCallback)
         return result;
     }
 
-    if (val_is_null(emitVideoCallback)) {
-        // We don't need to emit the video frame, it will be retrieved from the frame buffer later.
-        return 0;
+    if (!val_is_null(emitVideoCallback)) {
+        printf("[extension-ffmpegV] Emitting video frame to callback...\n");
+
+        // Since we are in a thread, allocating the buffer and executing the callback
+        // must be performed as a safe operation.
+        cffi_safe_operation([context, emitVideoCallback]()
+                            {
+            // printf("[extension-ffmpegV] Allocating buffer (buffer %d)...\n", context->videoOutputFrameSize);
+            buffer out_buffer = cffi_build_buffer(context->videoOutputFrameBuffer, context->videoOutputFrameSize);
+
+            // printf("[extension-ffmpegV] Emitting video frame via callback...\n");
+            value out_buffer_val = buffer_val(out_buffer);
+            val_call1(emitVideoCallback, out_buffer_val);
+            // printf("[extension-ffmpegV] Emitted video frame to callback...\n"); });
+        });
+    } else {
+        // printf("Nowhere to emit frame to!");
     }
 
-    // Since we are in a thread, allocating the buffer and executing the callback
-    // must be performed as a safe operation.
-    cffi_safe_operation([context, emitVideoCallback]()
-                        {
-        // printf("[extension-ffmpegV] Allocating buffer (buffer %d)...\n", context->videoOutputFrameSize);
-        buffer out_buffer = cffi_build_buffer(context->videoOutputFrameBuffer, context->videoOutputFrameSize);
-
-        // printf("[extension-ffmpegV] Emitting video frame via callback...\n");
-        value out_buffer_val = buffer_val(out_buffer);
-        val_call1(emitVideoCallback, out_buffer_val);
-        // printf("[extension-ffmpegV] Emitted video frame to callback...\n"); });
-    });
     return 0;
 }
 
@@ -160,5 +162,33 @@ DEFINE_FUNC_1(hx_ffmpeg_get_video_frame_number, context)
     FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
 
     int result = contextPointer->videoCodecCtx->frame_number;
+    return alloc_int(result);
+}
+
+/**
+ * @brief Attempt to place the latest frame of video data into `outputData`.
+ */
+int FFmpeg_generate_video(FFmpegContext *context, buffer videoBuffer) {
+    size_t bufferLength = buffer_size(videoBuffer);
+
+    if (bufferLength < context->videoOutputFrameSize) {
+        buffer_set_size(videoBuffer, context->videoOutputFrameSize);
+    }
+
+    char* bufferData = buffer_data(videoBuffer);
+
+    memcpy(bufferData, context->videoOutputFrameBuffer, context->videoOutputFrameSize);
+    
+    return 0;
+}
+
+DEFINE_FUNC_2(hx_ffmpeg_generate_video, context, videoBufferValue) {
+    FFmpegContext *contextPointer = FFmpegContext_unwrap(context);
+
+    buffer videoBuffer = val_to_buffer(videoBufferValue);
+
+    // printf("[extension-ffmpeg] Generating %d bytes of audio...\n", outputLenInt);
+
+    int result = FFmpeg_generate_video(contextPointer, videoBuffer);
     return alloc_int(result);
 }
