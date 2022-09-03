@@ -64,7 +64,7 @@ To build `extension-ffmpeg` from source, follow these steps:
 1. Do NOT download the repository by clicking the `Download ZIP` button on the Github page. 
 - Instead, run `git clone https://github.com/MasterEric/extension-ffmpeg` to create a local Git repository.
 2. Use [Brew](https://brew.sh/) or you can use [MacPorts](https://www.macports.org) to install dependencies:
-- `brew install nasm openssl`
+- `brew install nasm openssl` or `sudo port install nasm openssl`
 3. Navigate to the project folder.
 4. Call `git submodule update --init --recursive --remote` to download the source for FFmpeg.
 5. Navigate to `./lib.src/`.
