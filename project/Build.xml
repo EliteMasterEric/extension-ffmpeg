@@ -1,270 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xml>
+	<!-- Variables and compile flags. -->
+	<!-- <set name="HXCPP_CPP10" value="1" /> -->
+	<set name="OUTPUT_DIR" value="../ndll" unless="OUTPUT_DIR" />
+	<set name="DEBUGEXTRA" value="-debug" if="fulldebug" />
+	<set name="LIBSUFFIX" value="${HX_TARGET_SUFFIX}" if="HX_TARGET_SUFFIX" />
+	<set name="LIBSUFFIX" value="${LIBEXTRA}" unless="LIBSUFFIX" />
+	<set name="ndll-tool" value="dll" unless="iphone" />
+	<set name="ndll-tool" value="static" if="iphone" />
+	<set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
+	<!-- Include HXCPP common build flags. -->
 
-  <!-- Variables and compile flags.
-    <set name="HXCPP_CPP11" value="1" />
-  -->
-  <set name="OUTPUT_DIR" value="../ndll" unless="OUTPUT_DIR" />
-  <set name="DEBUGEXTRA" value="-debug" if="fulldebug" />
-  <set name="LIBSUFFIX" value="${HX_TARGET_SUFFIX}" if="HX_TARGET_SUFFIX" />
-  <set name="LIBSUFFIX" value="${LIBEXTRA}" unless="LIBSUFFIX" />
+	<include name="${HXCPP}/build-tool/BuildCommon.xml" />
 
-  <set name="ndll-tool" value="dll" unless="iphone" />
-  <set name="ndll-tool" value="static" if="iphone" />
+	<echo value="==========================" />
 
-  <set name="LIBFFMPEG_SRC" value="../lib.src/ffmpeg" />
+	<echo value="Building extension-ffmpeg..." />
 
-  <!-- Include HXCPP common build flags. -->
-  <include name="${HXCPP}/build-tool/BuildCommon.xml" />
+	<section if="windows HXCPP_M32">
+		<echo value="Target platform: Windows (x32)" />
+		<set name="LIBFFMPEG_BUILD" value="../lib.build/Windows32" />
+	</section>
 
-  <echo value="==========================" />
-  <echo value="Building extension-ffmpeg..." />
+	<section if="windows HXCPP_M64">
+		<echo value="Target platform: Windows (x64)" />
+		<set name="LIBFFMPEG_BUILD" value="../lib.build/Windows64" />
+	</section>
 
-  <section if="windows HXCPP_M32">
-    <echo value="Target platform: Windows (x32)" />
+	<section if="linux HXCPP_M32">
+		<echo value="Target platform: Linux (x32)" />
+		<echo value="WARNING: Build currently disabled on this platform!" />
+		<set name="LIBFFMPEG_BUILD" value="../lib.build/Linux32" />
+	</section>
 
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows32" />
-  </section>
+	<section if="linux HXCPP_M64">
+		<echo value="Target platform: Linux (x64)" />
+		<set name="LIBFFMPEG_BUILD" value="../lib.build/Linux64" />
+	</section>
 
-  <section if="windows HXCPP_M64">
-    <echo value="Target platform: Windows (x64)" />
+	<section if="mac HXCPP_M32">
+		<echo value="Target platform: Mac (x32)" />
+		<set name="LIBFFMPEG_BUILD" value="../lib.build/Mac32" />
+	</section>
 
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Windows64" />
-  </section>
+	<section if="mac HXCPP_M64">
+		<echo value="Target platform: Mac (x64)" />
+		<set name="LIBFFMPEG_BUILD" value="../lib.build/Mac64" />
+	</section>
 
-  <section if="linux HXCPP_M32">
-    <echo value="Target platform: Linux (x32)" />
-    <echo value="WARNING: Build currently disabled on this platform!" />
+	<section if="android">
+		<echo value="Target platform: Android (all)" />
+		<!--we dont set anything here because it needs to be chosen later-->
+	</section>
 
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Linux32" />
-  </section>
+	<echo value="==========================" />
 
-  <section if="linux HXCPP_M64">
-    <echo value="Target platform: Linux (x64)" />
+	<!-- extension-ffmpeg's CFFI interface code -->
+	<files id="core">
+		<!-- Add headers to search path. -->
+		<compilerflag value="-Iinclude" />
+		<compilerflag value="-I${LIBFFMPEG_SRC}" />
+		<compilerflag value="/std:c++20" if="windows" />
+		<compilerflag value="-D_ISOC99_SOURCE" />
+		<compilerflag value="-D_GNU_SOURCE=1" />
+		<compilerflag value="-D_FILE_OFFSET_BITS=64" />
+		<compilerflag value="-D_LARGEFILE_SOURCE" />
+		<compilerflag value="-DPIC" />
+		<compilerflag value="-DZLIB_CONST" />
+		<compilerflag value="-DHAVE_AV_CONFIG_H" />
+		<compilerflag value="-D_THREAD_SAFE" />
+		<!-- Dependencies of CFFI. -->
+		<depend name="${HXCPP}/include/hx/Macros.h" />
+		<depend name="${HXCPP}/include/hx/CFFI.h" />
+		<!-- The CFFI interface source. Split into multiple files for organizational purposes. -->
+		<depend name="common/HaxeCFFI.h" />
+		<file name="common/HaxeCFFI.cpp" />
+		<depend name="common/Codec.h" />
+		<file name="common/Codec.cpp" />
+		<depend name="common/Core.h" />
+		<file name="common/Core.cpp" />
+		<depend name="common/DecodeAudio.h" />
+		<file name="common/DecodeAudio.cpp" />
+		<depend name="common/DecodeMedia.h" />
+		<file name="common/DecodeMedia.cpp" />
+		<depend name="common/DecodeVideo.h" />
+		<file name="common/DecodeVideo.cpp" />
+		<depend name="common/Error.h" />
+		<file name="common/Error.cpp" />
+		<depend name="common/Format.h" />
+		<file name="common/Format.cpp" />
+		<depend name="common/SoftwareResample.h" />
+		<file name="common/SoftwareResample.cpp" />
+		<depend name="common/SoftwareScale.h" />
+		<file name="common/SoftwareScale.cpp" />
+		<depend name="common/Structures.h" />
+		<file name="common/Structures.cpp" />
+		<depend name="common/Syncronization.h" />
+		<file name="common/Syncronization.cpp" />
+		<depend name="common/Version.h" />
+		<file name="common/Version.cpp" />
+	</files>
 
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Linux64" />
-  </section>
+	<!-- The target NDLL file. -->
+	<target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
+		<outdir name="${OUTPUT_DIR}/${BINDIR}" />
+		<ext value=".so" />
 
-  <section if="mac HXCPP_M32">
-    <echo value="Target platform: Mac (x32)" />
+		<section if="windows">
+			<ext value=".ndll" />
+			<flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
+			<!-- avcodec -->
+			<lib name="Mfplat.lib" if="windows" />
+			<lib name="Mfuuid.lib" if="windows" />
+			<lib name="Ole32.lib" if="windows" />
+			<lib name="strmiids.lib" if="windows" />
+			<!-- avformat -->
+			<lib name="Secur32.lib" if="windows" />
+			<lib name="Ws2_32.lib" if="windows" />
+			<!-- avutil -->
+			<lib name="bcrypt.lib" if="windows" />
+			<lib name="avcodec.lib" />
+			<lib name="avdevice.lib" />
+			<lib name="avfilter.lib" />
+			<lib name="avformat.lib" />
+			<lib name="avutil.lib" />
+			<lib name="swresample.lib" />
+			<lib name="swscale.lib" />
+			<files id="core" />
+		</section>
 
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Mac32" />
-  </section>
+		<section if="linux">
+			<ext value=".ndll" />
+			<!-- Prioritize local built libs over system libs. -->
+			<flag value="-L${LIBFFMPEG_BUILD}" />
+			<flag value="-L/usr/lib" />
+			<!-- TODO: Fix on 32-bit systems (add docker builder?) -->
+			<section if="HXCPP_M64">
+				<!-- ORDER IS IMPORTANT for linked libraries. -->
+				<lib name="-lbz2" />
+				<lib name="-llzma" />
+				<lib name="-lm" />
+				<lib name="-lva-drm" />
+				<lib name="-lva-x11" />
+				<lib name="-lva" />
+				<lib name="-lvdpau" />
+				<lib name="-lvpx" />
+				<lib name="-lX11" />
+				<lib name="-lz" />
+				<lib name="-lssl" />
+				<!-- crypto must link after ssl -->
+				<lib name="-lcrypto" />
+				<!-- avformat must link before avcodec -->
+				<lib name="-lavformat" />
+				<lib name="-lavcodec" />
+				<lib name="-lavdevice" />
+				<lib name="-lavfilter" />
+				<lib name="-lavutil" />
+				<lib name="-lswresample" />
+				<lib name="-lswscale" />
+				<files id="core" />
+			</section>
+		</section>
 
-  <section if="mac HXCPP_M64">
-    <echo value="Target platform: Mac (x64)" />
+		<section if="mac">
+			<!-- TODO: Resolve issues. -->
+			<ext value=".ndll" />
+			<!-- vflag is used to link frameworks. -->
+			<vflag name="-framework" value="CoreServices" />
+			<vflag name="-framework" value="CoreFoundation" />
+			<vflag name="-framework" value="CoreMedia" />
+			<vflag name="-framework" value="CoreAudio" />
+			<vflag name="-framework" value="AudioUnit" />
+			<vflag name="-framework" value="AudioToolbox" />
+			<vflag name="-framework" value="CoreVideo" />
+			<vflag name="-framework" value="VideoToolbox" />
+			<!-- Prioritize local built libs over system libs. -->
+			<flag value="-L${LIBFFMPEG_BUILD}" />
+			<flag value="-L/usr/local/opt/openssl/lib" />
+			<flag value="-L/usr/local/lib" />
+			<flag value="-L/usr/lib" />
+			<!-- ORDER IS IMPORTANT for linked libraries. -->
+			<!-- Put crypto and ssl first? -->
+			<lib name="-lcrypto" />
+			<lib name="-lssl" />
+			<lib name="-lbz2" />
+			<lib name="-lc++" />
+			<lib name="-llzma" />
+			<lib name="-lz" />
+			<!-- avformat must link before avcodec -->
+			<lib name="-lavformat" />
+			<lib name="-lavcodec" />
+			<lib name="-lavdevice" />
+			<lib name="-lavfilter" />
+			<lib name="-lavutil" />
+			<lib name="-lswresample" />
+			<lib name="-lswscale" />
+			<files id="core" />
+		</section>
 
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Mac64" />
-  </section>
+		<section if="android">
+			<ext value=".so" />
+			<!--in here we set the place where the libs are for multiple archs -->
+			<section if="HXCPP_ARM64">
+				<flag value="-L../lib.build/android-64" />
+			</section>
+			<section if="HXCPP_ARMV7">
+				<flag value="-L../lib.build/android-v7" />
+			</section>
+			<section if="HXCPP_X86">
+				<flag value="-L../lib.build/android-x86" />
+			</section>
+			<section if="HXCPP_x86_64">
+				<flag value="-L../lib.build/android-x86_64" />
+			</section>
+			<!-- <lib name="-lbz2" /> -->
+			<!-- <lib name="-llzma" /> -->
+			<lib name="-lm" />
+			<lib name="-lz" />
+			<!-- ORDER IS IMPORTANT! avformat must be included first. -->
+			<lib name="-lavformat" />
+			<lib name="-lavcodec" />
+			<lib name="-lavdevice" />
+			<lib name="-lavfilter" />
+			<lib name="-lavutil" />
+			<lib name="-lswresample" />
+			<lib name="-lswscale" />
+			<files id="core" />
+		</section>
+	</target>
 
-  <section if="android">
-    <echo value="Target platform: Android (aarch64)" />
-
-    <set name="LIBFFMPEG_BUILD" value="../lib.build/Android64" />
-  </section>
-
-  <echo value="==========================" />
-
-  <!-- extension-ffmpeg's CFFI interface code -->
-  <files id="core">
-    <!-- Add headers to search path. -->
-    <compilerflag value="-Iinclude" />
-    <compilerflag value="-I${LIBFFMPEG_SRC}" />
-    
-    <compilerflag value="/std:c++20" if="windows" />
-
-    <compilerflag value="-D_ISOC99_SOURCE" />
-    <compilerflag value="-D_GNU_SOURCE=1" />
-    <compilerflag value="-D_FILE_OFFSET_BITS=64" />
-    <compilerflag value="-D_LARGEFILE_SOURCE" />
-    <compilerflag value="-DPIC" />
-    <compilerflag value="-DZLIB_CONST" />
-    <compilerflag value="-DHAVE_AV_CONFIG_H" />
-    <compilerflag value="-D_THREAD_SAFE" />
-
-    <!-- Dependencies of CFFI. -->
-    <depend name="${HXCPP}/include/hx/Macros.h" />
-    <depend name="${HXCPP}/include/hx/CFFI.h" />
-
-    <!--
-      The CFFI interface source.
-      Split into multiple files for organizational purposes.
-    -->
-    <depend name="common/HaxeCFFI.h" />
-    <file name="common/HaxeCFFI.cpp" />
-
-    <depend name="common/Codec.h" />
-    <file name="common/Codec.cpp" />
-    <depend name="common/Core.h" />
-    <file name="common/Core.cpp" />
-    <depend name="common/DecodeAudio.h" />
-    <file name="common/DecodeAudio.cpp" />
-    <depend name="common/DecodeMedia.h" />
-    <file name="common/DecodeMedia.cpp" />
-    <depend name="common/DecodeVideo.h" />
-    <file name="common/DecodeVideo.cpp" />
-    <depend name="common/Error.h" />
-    <file name="common/Error.cpp" />
-    <depend name="common/Format.h" />
-    <file name="common/Format.cpp" />
-    <depend name="common/SoftwareResample.h" />
-    <file name="common/SoftwareResample.cpp" />
-    <depend name="common/SoftwareScale.h" />
-    <file name="common/SoftwareScale.cpp" />
-    <depend name="common/Structures.h" />
-    <file name="common/Structures.cpp" />
-    <depend name="common/Syncronization.h" />
-    <file name="common/Syncronization.cpp" />
-    <depend name="common/Version.h" />
-    <file name="common/Version.cpp" />
-  </files>
-
-  <!-- The target NDLL file. -->
-  <target id="NDLL" output="${LIBPREFIX}extension-ffmpeg${DEBUGEXTRA}${LIBSUFFIX}" tool="linker" toolid="${STD_MODULE_LINK}">
-    <outdir name="${OUTPUT_DIR}/${BINDIR}" />
-
-    <ext value=".so" />
-
-    <section if="windows">
-      <ext value=".ndll" />
-
-      <flag value="-libpath:${LIBFFMPEG_BUILD}" if="windows" />
-
-      <!-- avcodec -->
-      <lib name="Mfplat.lib" if="windows" />
-      <lib name="Mfuuid.lib" if="windows" />
-      <lib name="Ole32.lib" if="windows" />
-      <lib name="strmiids.lib" if="windows" />
-
-      <!-- avformat -->
-      <lib name="Secur32.lib" if="windows" />
-      <lib name="Ws2_32.lib" if="windows" />
-
-      <!-- avutil -->
-      <lib name="bcrypt.lib" if="windows" />
-
-      <lib name="avcodec.lib" />
-      <lib name="avdevice.lib" />
-      <lib name="avfilter.lib" />
-      <lib name="avformat.lib" />
-      <lib name="avutil.lib" />
-      <lib name="swresample.lib" />
-      <lib name="swscale.lib" />
-
-      <files id="core" />
-    </section>
-
-    <section if="mac">
-      <ext value=".ndll" />
-    </section>
-
-    <section if="linux">
-      <ext value=".ndll" />
-
-      <!-- Prioritize local built libs over system libs. -->
-      <flag value="-L${LIBFFMPEG_BUILD}" />
-      <flag value="-L/usr/lib" />
-
-      <!-- TODO: Fix on 32-bit systems (add docker builder?) -->
-      <section if="HXCPP_M64">
-        <!-- ORDER IS IMPORTANT for linked libraries. -->
-        <lib name="-lbz2" />
-        <lib name="-llzma" />
-        <lib name="-lm" />
-        <lib name="-lva-drm" />
-        <lib name="-lva-x11" />
-        <lib name="-lva" />
-        <lib name="-lvdpau" />
-        <lib name="-lvpx" />
-        <lib name="-lX11" />
-        <lib name="-lz" />
-
-        <lib name="-lssl" />
-        <!-- crypto must link after ssl -->
-        <lib name="-lcrypto" />
-
-        <!-- avformat must link before avcodec -->
-        <lib name="-lavformat" />
-
-        <lib name="-lavcodec" />
-        <lib name="-lavdevice" />
-        <lib name="-lavfilter" />
-        <lib name="-lavutil" />
-        <lib name="-lswresample" />
-        <lib name="-lswscale" />
-
-        <files id="core" />
-      </section>
-    </section>
-
-    <section if="mac">
-      <!-- TODO: Resolve issues. -->
-      <ext value=".ndll" />
-
-      <!-- vflag is used to link frameworks. -->
-      <vflag name="-framework" value="CoreServices" />
-      <vflag name="-framework" value="CoreFoundation" />
-      <vflag name="-framework" value="CoreMedia" />
-      <vflag name="-framework" value="CoreAudio" />
-      <vflag name="-framework" value="AudioUnit" />
-      <vflag name="-framework" value="AudioToolbox" />
-      <vflag name="-framework" value="CoreVideo" />
-      <vflag name="-framework" value="VideoToolbox" />
-
-      <!-- Prioritize local built libs over system libs. -->
-      <flag value="-L${LIBFFMPEG_BUILD}" />
-      <flag value="-L/usr/local/opt/openssl/lib" />
-      <flag value="-L/usr/local/lib" />
-      <flag value="-L/usr/lib" />
-
-      <!-- ORDER IS IMPORTANT for linked libraries. -->
-      <!-- Put crypto and ssl first? -->
-      <lib name="-lcrypto" />
-      <lib name="-lssl" />
-      <lib name="-lbz2" />
-      <lib name="-lc++" />
-      <lib name="-llzma" />
-      <lib name="-lz" />
-
-      <!-- avformat must link before avcodec -->
-      <lib name="-lavformat" />
-
-      <lib name="-lavcodec" />
-      <lib name="-lavdevice" />
-      <lib name="-lavfilter" />
-      <lib name="-lavutil" />
-      <lib name="-lswresample" />
-      <lib name="-lswscale" />
-
-      <files id="core" />
-    </section>
-
-    <section if="android">
-      <ext value=".so" />
-
-      <!-- Prioritize local built libs over system libs. -->
-      <flag value="-L${LIBFFMPEG_BUILD}" />
-      <flag value="-L/usr/lib" />
-
-      <lib name="-lbz2" />
-      <lib name="-llzma" />
-      <lib name="-lm" />
-      <lib name="-lz" />
-      <!-- ORDER IS IMPORTANT! avformat must be included first. -->
-      <lib name="-lavformat" />
-      <lib name="-lavcodec" />
-      <lib name="-lavdevice" />
-      <lib name="-lavfilter" />
-      <lib name="-lavutil" />
-      <lib name="-lswresample" />
-      <lib name="-lswscale" />
-      <files id="core" />
-    </section>
-  </target>
-
-  <!-- Redirect to the NDLL target if unspecified. -->
-  <target id="default">
-    <target id="NDLL" />
-  </target>
-
+	<!-- Redirect to the NDLL target if unspecified. -->
+	<target id="default">
+		<target id="NDLL" />
+	</target>
 </xml>
