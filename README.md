@@ -80,7 +80,7 @@ Be sure to run `lime rebuild extension-ffmpeg mac -debug` instead if you are pla
 ## Building for android
 
 To build `extension-ffmpeg` from source, follow these steps:
-1. Download and unzip the android ndk (r23c)
+1. Download and unzip the android ndk (r21e)
 2. Navigate to the project folder.
 3. Call `git submodule update --recursive` to download the source for FFmpeg.
 4. Navigate to `./lib.src/`.
